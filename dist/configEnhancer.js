@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
-        let authorization = {};
+        let authorization;
         switch (destination.Authentication) {
             case "BasicAuthentication":
                 authorization = yield propertiesForBasicAuthentication(destination);

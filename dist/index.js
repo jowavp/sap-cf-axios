@@ -24,10 +24,32 @@ const axios_1 = __importDefault(require("axios"));
 const axios_cookiejar_support_1 = __importDefault(require("axios-cookiejar-support"));
 const tough = __importStar(require("tough-cookie"));
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
-function sapCfAxios(destination) {
+function SapCfAxios(destination) {
+    const instance = createInstance(destination);
+    return (req) => __awaiter(this, void 0, void 0, function* () {
+        if (req.xsrfHeaderName) {
+            // handle x-csrf-Token
+            var tokenReq = {
+                url: req.url || "",
+                method: "options",
+                headers: {
+                    [req.xsrfHeaderName]: "Fetch"
+                }
+            };
+            var { headers } = yield (yield instance)(tokenReq);
+            if (!req.headers)
+                req.headers = {};
+            req.headers['x-csrf-token'] = headers['x-csrf-token'];
+            return (yield instance)(req);
+        }
+        return (yield instance)(req);
+    });
+}
+exports.default = SapCfAxios;
+function createInstance(destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // we will add an interceptor to axios that will take care of the destination configuration
-        const destinationConfiguration = typeof destination === 'string' ? yield destination_1.readDestination(destination) : destination;
+        const destinationConfiguration = yield destination_1.readDestination(destination);
         const instance = axios_1.default.create();
         // set cookiesupport to enable X-CSRF-Token requests
         axios_cookiejar_support_1.default(instance);
@@ -41,4 +63,3 @@ function sapCfAxios(destination) {
         return instance;
     });
 }
-exports.default = sapCfAxios;

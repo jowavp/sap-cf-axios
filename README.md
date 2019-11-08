@@ -6,7 +6,7 @@ The destination will override the baseURL and authentication header in a request
 currently only authorizationtypes BasicAuthentication and OAuth2UserTokenExchange are supported.
 
 ## Usage
-    import sapCfAxios from 'sap-cf-axios'
+    import SapCfAxios from 'sap-cf-axios'
 
-    const instance = sapCfAxios("destinationName");
-    instance({ ...axiosRequestConfig })
+    const axios = SapCfAxios("<destinationName>");
+    axios({ ...axiosRequestConfig });

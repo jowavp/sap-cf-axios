@@ -1,22 +1,40 @@
 
 import axios, { AxiosRequestConfig } from 'axios';
 import { IDestinationConfiguration } from './destination';
+import { readConnectivity } from './connectivity';
 
 export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationConfiguration) {
     
-    let authorization = {};
     switch(destination.Authentication){
         case "BasicAuthentication":
-            authorization = await propertiesForBasicAuthentication(destination);
+            config = { 
+                ...config,
+                ...(await propertiesForBasicAuthentication(destination))
+            }
             break;
         case "OAuth2UserTokenExchange":
-            authorization = await propertiesForOAuth2UserTokenExchange(destination, config)
+            config = { 
+                ...config,
+                ...(await propertiesForOAuth2UserTokenExchange(destination, config))
+            }
             break;
+    }
+
+    if( destination.ProxyType.toLowerCase() !== "Internet" ){
+        // connect over the cloud connector
+        const connectivityValues = await readConnectivity();
+        config = {
+            ...config,
+            proxy: connectivityValues.proxy,
+            headers: {
+                ...config.headers,
+                ...connectivityValues.headers
+            }
+        }
     }
 
     return {
         ...config,
-        ...authorization,
         baseURL: destination.URL
     }
 }

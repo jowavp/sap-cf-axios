@@ -1,2 +1,2 @@
-import { IDestinationConfiguration } from './destination';
-export default function sapCfAxios(destination: string | IDestinationConfiguration): Promise<import("axios").AxiosInstance>;
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
+export default function SapCfAxios(destination: string): <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>;

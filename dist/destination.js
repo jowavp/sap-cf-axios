@@ -24,14 +24,14 @@ const xsenv = __importStar(require("@sap/xsenv"));
 function readDestination(destinationName) {
     return __awaiter(this, void 0, void 0, function* () {
         const access_token = yield createToken(getDestinationService());
-        return getDestination(access_token, getDestinationService());
+        return getDestination(access_token, destinationName, getDestinationService());
     });
 }
 exports.readDestination = readDestination;
-function getDestination(access_token, ds) {
+function getDestination(access_token, destinationName, ds) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield axios_1.default({
-            url: `${ds.uri}/destination-configuration/v1/destinations/${ds.name}`,
+            url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
             method: 'GET',
             headers: { 'Authorization': `Bearer ${access_token}` },
             responseType: 'json',

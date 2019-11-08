@@ -4,8 +4,8 @@ import * as xsenv from '@sap/xsenv';
 
 export async function readDestination(destinationName: string) {
 
-    const access_token = await createToken(getDestinationService());
-    return getDestination(access_token, getDestinationService());
+    const access_token = await createToken(getService());
+    return getDestination(access_token, destinationName, getService());
 
 }
 
@@ -31,7 +31,6 @@ export interface IDestinationConfiguration {
 }
 
 interface IDestinationService {
-    name: string;
     // url for authentication
     url: string;
     // url for destination configuration
@@ -40,9 +39,9 @@ interface IDestinationService {
     clientsecret: string;
 }
 
-async function getDestination (access_token: string, ds: IDestinationService): Promise<IDestinationConfiguration> {
+async function getDestination (access_token: string, destinationName: string, ds: IDestinationService): Promise<IDestinationConfiguration> {
     const response = await axios({
-        url: `${ds.uri}/destination-configuration/v1/destinations/${ds.name}`,
+        url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
         method: 'GET',
         headers: { 'Authorization': `Bearer ${access_token}` },
         responseType: 'json',
@@ -64,7 +63,7 @@ async function createToken (ds: IDestinationService): Promise<string> {
     })).data.access_token;
 };
 
-function getDestinationService(): IDestinationService{
+function getService(): IDestinationService{
     const {destination} = xsenv.getServices({
         destination: {
             tag: 'destination'
