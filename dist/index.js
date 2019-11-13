@@ -47,7 +47,7 @@ function SapCfAxios(destination) {
 }
 exports.SapCfAxios = SapCfAxios;
 exports = SapCfAxios;
-function createInstance(destination, instanceConfig) {
+function createInstance(destinationName, instanceConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         // we will add an interceptor to axios that will take care of the destination configuration
         const instance = axios_1.default.create(instanceConfig);
@@ -58,8 +58,8 @@ function createInstance(destination, instanceConfig) {
         // we return the destination configuration in the response.
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
             // enhance config object with destination information
-            const destinationConfiguration = yield destination_1.readDestination(destination, config.headers["Authorization"]);
-            return configEnhancer_1.default(config, destinationConfiguration);
+            const destination = yield destination_1.readDestination(destinationName, config.headers["Authorization"]);
+            return configEnhancer_1.default(config, destination);
         }));
         return instance;
     });

@@ -41,7 +41,7 @@ function getDestination(access_token, destinationName, ds, jwtToken) {
             },
             responseType: 'json',
         });
-        return response.data.destinationConfiguration;
+        return response.data;
     });
 }
 function createToken(ds) {

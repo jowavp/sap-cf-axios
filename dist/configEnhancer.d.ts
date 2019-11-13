@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
-import { IDestinationConfiguration } from './destination';
-export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationConfiguration): Promise<{
+import { IDestinationData } from './destination';
+export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData): Promise<{
     baseURL: string;
     url?: string | undefined;
     method?: "head" | "get" | "GET" | "delete" | "DELETE" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | undefined;
