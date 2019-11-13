@@ -1,9 +1,11 @@
 {
   "name": "sap-cf-axios",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Wrap axios to use the SAP Cloud Foundry destination Service",
   "main": "dist/index.js",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
@@ -23,6 +25,8 @@
     "@sap/xsenv": "^2.1.0",
     "axios": "^0.19.0",
     "axios-cookiejar-support": "^0.5.0",
+    "https": "^1.0.0",
+    "https-proxy-agent": "^3.0.1",
     "tough-cookie": "^3.0.1"
   },
   "devDependencies": {

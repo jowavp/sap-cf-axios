@@ -13,18 +13,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
+const connectivity_1 = require("./connectivity");
+// import {https} from 'https';
+// import ProxyAgent from 'https-proxy-agent';
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
-        let authorization;
         switch (destination.Authentication) {
             case "BasicAuthentication":
-                authorization = yield propertiesForBasicAuthentication(destination);
+                config = Object.assign(Object.assign({}, config), (yield propertiesForBasicAuthentication(destination)));
                 break;
             case "OAuth2UserTokenExchange":
-                authorization = yield propertiesForOAuth2UserTokenExchange(destination, config);
+                config = Object.assign(Object.assign({}, config), (yield propertiesForOAuth2UserTokenExchange(destination, config)));
                 break;
         }
-        return Object.assign(Object.assign(Object.assign({}, config), authorization), { baseURL: destination.URL });
+        if (destination.ProxyType.toLowerCase() === "onpremise") {
+            // connect over the cloud connector
+            const connectivityValues = yield connectivity_1.readConnectivity(destination.CloudConnectorLocationId);
+            /*
+            var proxyOpts = url.parse(`http://${connectivityValues.proxy.host}:${}`);
+            proxyOpts.headers = {
+            'Proxy-Authentication': 'Basic ' + new Buffer('username:password').toString('base64')
+            };
+            var proxy = new ProxyAgent(proxyOpts);
+            */
+            config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
+        }
+        return Object.assign(Object.assign({}, config), { baseURL: destination.URL });
     });
 }
 exports.default = enhanceConfig;

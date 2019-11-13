@@ -2,6 +2,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { IDestinationConfiguration } from './destination';
 import { readConnectivity } from './connectivity';
+// import {https} from 'https';
+// import ProxyAgent from 'https-proxy-agent';
 
 export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationConfiguration) {
     
@@ -20,9 +22,19 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
             break;
     }
 
-    if( destination.ProxyType.toLowerCase() !== "Internet" ){
+    if( destination.ProxyType.toLowerCase() === "onpremise" ){
         // connect over the cloud connector
-        const connectivityValues = await readConnectivity();
+        const connectivityValues = await readConnectivity(destination.CloudConnectorLocationId);
+
+        
+        /*
+        var proxyOpts = url.parse(`http://${connectivityValues.proxy.host}:${}`);
+        proxyOpts.headers = {
+        'Proxy-Authentication': 'Basic ' + new Buffer('username:password').toString('base64')
+        };
+        var proxy = new ProxyAgent(proxyOpts);
+        */
+
         config = {
             ...config,
             proxy: connectivityValues.proxy,

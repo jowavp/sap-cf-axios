@@ -1,20 +1,35 @@
 import axios, { AxiosProxyConfig } from 'axios';
 import * as xsenv from '@sap/xsenv';
 
-export async function readConnectivity() {
+interface IConnectivityConfig {
+    proxy: AxiosProxyConfig,
+    headers: {
+        'Proxy-Authorization': string;
+        'SAP-Connectivity-SCC-Location_ID'?: string;
+    }
+}
+
+export async function readConnectivity(locationId?: string) {
     const connectivityService = getService();
     const access_token = await createToken(connectivityService);
     const proxy: AxiosProxyConfig = {
         host: connectivityService.onpremise_proxy_host,
-        port: parseInt(connectivityService.onpremise_proxy_port, 10)
+        port: parseInt(connectivityService.onpremise_proxy_port, 10),
+        protocol: 'http'
     };
-    
-    return {
+
+    const result:IConnectivityConfig = {
         proxy,
         headers: {
-            'Proxy-Authorization': `Bearer ${access_token}`
+            'Proxy-Authorization': `Bearer ${access_token}`    
         }
     }
+
+    if(locationId) {
+        result.headers["SAP-Connectivity-SCC-Location_ID"] = locationId;
+    }
+
+    return result;
 
 }
 
@@ -34,7 +49,7 @@ async function createToken (service: IConnectivityService): Promise<string> {
 
 function getService(): IConnectivityService{
     const {connectivity} = xsenv.getServices({
-        destination: {
+        connectivity: {
             tag: 'connectivity'
         }
     });

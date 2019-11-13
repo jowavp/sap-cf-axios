@@ -21,48 +21,52 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const xsenv = __importStar(require("@sap/xsenv"));
-function readDestination(destinationName) {
+function readConnectivity(locationId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const access_token = yield createToken(getService());
-        return getDestination(access_token, destinationName, getService());
+        const connectivityService = getService();
+        const access_token = yield createToken(connectivityService);
+        const proxy = {
+            host: connectivityService.onpremise_proxy_host,
+            port: parseInt(connectivityService.onpremise_proxy_port, 10),
+            protocol: 'http'
+        };
+        const result = {
+            proxy,
+            headers: {
+                'Proxy-Authorization': `Bearer ${access_token}`
+            }
+        };
+        if (locationId) {
+            result.headers["SAP-Connectivity-SCC-Location_ID"] = locationId;
+        }
+        return result;
     });
 }
-exports.readDestination = readDestination;
-function getDestination(access_token, destinationName, ds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield axios_1.default({
-            url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${access_token}` },
-            responseType: 'json',
-        });
-        return response.data.destinationConfiguration;
-    });
-}
-function createToken(ds) {
+exports.readConnectivity = readConnectivity;
+function createToken(service) {
     return __awaiter(this, void 0, void 0, function* () {
         return (yield axios_1.default({
-            url: `${ds.url}/oauth/token`,
+            url: `${service.url}/oauth/token`,
             method: 'POST',
             responseType: 'json',
-            data: `client_id=${encodeURIComponent(ds.clientid)}&grant_type=client_credentials`,
+            data: `client_id=${encodeURIComponent(service.clientid)}&grant_type=client_credentials`,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             auth: {
-                username: ds.clientid,
-                password: ds.clientsecret
+                username: service.clientid,
+                password: service.clientsecret
             }
         })).data.access_token;
     });
 }
 ;
 function getService() {
-    const { destination } = xsenv.getServices({
-        destination: {
-            tag: 'destination'
+    const { connectivity } = xsenv.getServices({
+        connectivity: {
+            tag: 'connectivity'
         }
     });
-    if (!destination) {
-        throw ('No destination service available');
+    if (!connectivity) {
+        throw ('No connectivity service available');
     }
-    return destination;
+    return connectivity;
 }
