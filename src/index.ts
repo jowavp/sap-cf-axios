@@ -1,10 +1,12 @@
-import {readDestination, IDestinationConfiguration} from './destination'
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import {readDestination} from './destination'
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import * as tough from 'tough-cookie';
 import enhanceConfig from './configEnhancer';
 
-export default function SapCfAxios(destination: string) {
+declare var exports: any;
+
+export function SapCfAxios(destination: string) {
     const instance = createInstance(destination);
     return async<T>(req:AxiosRequestConfig): Promise<AxiosResponse<T>> => { 
         if(req.xsrfHeaderName){
@@ -24,13 +26,13 @@ export default function SapCfAxios(destination: string) {
         return (await instance)(req) 
     }
 }
+exports = SapCfAxios;
 
-async function createInstance(destination: string) {
+async function createInstance(destination: string, instanceConfig?: AxiosRequestConfig) {
 
     // we will add an interceptor to axios that will take care of the destination configuration
-    const destinationConfiguration = await readDestination(destination);
-
-    const instance = axios.create();
+    
+    const instance = axios.create(instanceConfig);
 
     // set cookiesupport to enable X-CSRF-Token requests
     axiosCookieJarSupport(instance);
@@ -41,6 +43,7 @@ async function createInstance(destination: string) {
     instance.interceptors.request.use(
         async (config) => {
             // enhance config object with destination information
+            const destinationConfiguration = await readDestination(destination, config.headers["Authorization"]);
             return enhanceConfig(config, destinationConfiguration);
         }
     );    

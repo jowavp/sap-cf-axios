@@ -2,10 +2,13 @@
 import axios from 'axios';
 import * as xsenv from '@sap/xsenv';
 
-export async function readDestination(destinationName: string) {
+export async function readDestination(destinationName: string, authorizationHeader: string) {
 
     const access_token = await createToken(getService());
-    return getDestination(access_token, destinationName, getService());
+    
+    // if we have a JWT token, we send it to the destination service to generate the new authorization header
+    const jwtToken = /bearer /i.test(authorizationHeader) ? authorizationHeader.replace(/bearer /i, "") : null;
+    return getDestination(access_token, destinationName, getService(), jwtToken);
 
 }
 
@@ -29,6 +32,14 @@ export interface IDestinationConfiguration {
 
     WebIDEUsage: string;
     WebIDEEnabled: string;
+
+    authTokens:
+        {
+            type: string;
+            value: string;
+            expires_in: string;
+            error: string;
+        }[]
 }
 
 interface IDestinationService {
@@ -40,11 +51,14 @@ interface IDestinationService {
     clientsecret: string;
 }
 
-async function getDestination (access_token: string, destinationName: string, ds: IDestinationService): Promise<IDestinationConfiguration> {
+async function getDestination (access_token: string, destinationName: string, ds: IDestinationService, jwtToken: string | null): Promise<IDestinationConfiguration> {
     const response = await axios({
         url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${access_token}` },
+        headers: { 
+            'Authorization': `Bearer ${access_token}`,
+            'X-user-token':  jwtToken
+        },
         responseType: 'json',
     });
     return response.data.destinationConfiguration;

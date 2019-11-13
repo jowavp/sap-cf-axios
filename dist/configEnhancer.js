@@ -18,24 +18,32 @@ const connectivity_1 = require("./connectivity");
 // import ProxyAgent from 'https-proxy-agent';
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
-        switch (destination.Authentication) {
+        /*
+        switch(destination.Authentication){
             case "BasicAuthentication":
-                config = Object.assign(Object.assign({}, config), (yield propertiesForBasicAuthentication(destination)));
+                config = {
+                    ...config,
+                    ...(await propertiesForBasicAuthentication(destination))
+                }
                 break;
             case "OAuth2UserTokenExchange":
-                config = Object.assign(Object.assign({}, config), (yield propertiesForOAuth2UserTokenExchange(destination, config)));
+                config = {
+                    ...config,
+                    ...(await propertiesForOAuth2UserTokenExchange(destination, config))
+                }
                 break;
+        }
+        */
+        // add auth header
+        if (destination.authTokens && destination.authTokens[0]) {
+            if (destination.authTokens[0].error) {
+                throw (new Error(destination.authTokens[0].error));
+            }
+            config.headers = Object.assign(Object.assign({}, config.headers), { authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
         }
         if (destination.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
             const connectivityValues = yield connectivity_1.readConnectivity(destination.CloudConnectorLocationId);
-            /*
-            var proxyOpts = url.parse(`http://${connectivityValues.proxy.host}:${}`);
-            proxyOpts.headers = {
-            'Proxy-Authentication': 'Basic ' + new Buffer('username:password').toString('base64')
-            };
-            var proxy = new ProxyAgent(proxyOpts);
-            */
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
         }
         return Object.assign(Object.assign({}, config), { baseURL: destination.URL });
@@ -50,6 +58,16 @@ function propertiesForBasicAuthentication(destination) {
                 password: destination.Password
             }
         };
+    });
+}
+function propertiesForPrincipalPropagation(destination, config) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // TODO
+    });
+}
+function propertiesForOAuth2SAMLBearerAssertion(destination, config) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 
     });
 }
 function propertiesForOAuth2UserTokenExchange(destination, config) {

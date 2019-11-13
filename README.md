@@ -5,8 +5,11 @@ The destination will override the baseURL and authentication header in a request
 
 currently only authorizationtypes BasicAuthentication and OAuth2UserTokenExchange are supported.
 
+You can address destinations pointing to onPremise systems. The library will handle the proxy configuration.
+
 ## Usage
-    import SapCfAxios from 'sap-cf-axios'
+    
+    const sapcfaxios = require('sap-cf-axios');
 
     const axios = SapCfAxios("<destinationName>");
     axios({ ...axiosRequestConfig });

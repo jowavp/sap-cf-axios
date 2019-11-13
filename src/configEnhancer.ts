@@ -7,6 +7,7 @@ import { readConnectivity } from './connectivity';
 
 export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationConfiguration) {
     
+    /*
     switch(destination.Authentication){
         case "BasicAuthentication":
             config = { 
@@ -21,19 +22,21 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
             }
             break;
     }
+    */
+   // add auth header
+   if (destination.authTokens && destination.authTokens[0]){
+       if(destination.authTokens[0].error){
+           throw( new Error(destination.authTokens[0].error) );
+       }
+        config.headers = {
+            ...config.headers,
+            authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`
+        }
+    }
 
     if( destination.ProxyType.toLowerCase() === "onpremise" ){
         // connect over the cloud connector
         const connectivityValues = await readConnectivity(destination.CloudConnectorLocationId);
-
-        
-        /*
-        var proxyOpts = url.parse(`http://${connectivityValues.proxy.host}:${}`);
-        proxyOpts.headers = {
-        'Proxy-Authentication': 'Basic ' + new Buffer('username:password').toString('base64')
-        };
-        var proxy = new ProxyAgent(proxyOpts);
-        */
 
         config = {
             ...config,
@@ -58,6 +61,14 @@ async function propertiesForBasicAuthentication(destination: IDestinationConfigu
             password: destination.Password
         }
     }
+}
+
+async function propertiesForPrincipalPropagation(destination: IDestinationConfiguration, config: AxiosRequestConfig){
+    // TODO
+}
+
+async function propertiesForOAuth2SAMLBearerAssertion(destination: IDestinationConfiguration, config: AxiosRequestConfig){
+    // 
 }
 
 async function propertiesForOAuth2UserTokenExchange(destination: IDestinationConfiguration, config: AxiosRequestConfig){

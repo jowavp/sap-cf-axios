@@ -45,12 +45,12 @@ function SapCfAxios(destination) {
         return (yield instance)(req);
     });
 }
-exports.default = SapCfAxios;
-function createInstance(destination) {
+exports.SapCfAxios = SapCfAxios;
+exports = SapCfAxios;
+function createInstance(destination, instanceConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         // we will add an interceptor to axios that will take care of the destination configuration
-        const destinationConfiguration = yield destination_1.readDestination(destination);
-        const instance = axios_1.default.create();
+        const instance = axios_1.default.create(instanceConfig);
         // set cookiesupport to enable X-CSRF-Token requests
         axios_cookiejar_support_1.default(instance);
         instance.defaults.jar = new tough.CookieJar();
@@ -58,6 +58,7 @@ function createInstance(destination) {
         // we return the destination configuration in the response.
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
             // enhance config object with destination information
+            const destinationConfiguration = yield destination_1.readDestination(destination, config.headers["Authorization"]);
             return configEnhancer_1.default(config, destinationConfiguration);
         }));
         return instance;

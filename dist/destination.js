@@ -21,19 +21,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const xsenv = __importStar(require("@sap/xsenv"));
-function readDestination(destinationName) {
+function readDestination(destinationName, authorizationHeader) {
     return __awaiter(this, void 0, void 0, function* () {
         const access_token = yield createToken(getService());
-        return getDestination(access_token, destinationName, getService());
+        // if we have a JWT token, we send it to the destination service to generate the new authorization header
+        const jwtToken = /bearer /i.test(authorizationHeader) ? authorizationHeader.replace(/bearer /i, "") : null;
+        return getDestination(access_token, destinationName, getService(), jwtToken);
     });
 }
 exports.readDestination = readDestination;
-function getDestination(access_token, destinationName, ds) {
+function getDestination(access_token, destinationName, ds, jwtToken) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield axios_1.default({
             url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${access_token}` },
+            headers: {
+                'Authorization': `Bearer ${access_token}`,
+                'X-user-token': jwtToken
+            },
             responseType: 'json',
         });
         return response.data.destinationConfiguration;
