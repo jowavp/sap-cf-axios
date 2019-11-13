@@ -9,7 +9,7 @@ You can address destinations pointing to onPremise systems. The library will han
 
 ## Usage
     
-    const sapcfaxios = require('sap-cf-axios');
+    const {SapCfAxios} = require('sap-cf-axios');
 
     const axios = SapCfAxios("<destinationName>");
     axios({ ...axiosRequestConfig });

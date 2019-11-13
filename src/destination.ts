@@ -12,6 +12,21 @@ export async function readDestination(destinationName: string, authorizationHead
 
 }
 
+export interface IDestinationData {
+    "owner": {
+        "SubaccountId": string;
+        "InstanceId": string;
+    },
+    "destinationConfiguration": IDestinationConfiguration,
+    "authTokens": 
+    {
+        type: string;
+        value: string;
+        expires_in: string;
+        error: string;
+    }[]
+}
+
 export interface IDestinationConfiguration {
     Name: string;
     Type: string;
@@ -33,13 +48,6 @@ export interface IDestinationConfiguration {
     WebIDEUsage: string;
     WebIDEEnabled: string;
 
-    authTokens:
-        {
-            type: string;
-            value: string;
-            expires_in: string;
-            error: string;
-        }[]
 }
 
 interface IDestinationService {
@@ -51,7 +59,7 @@ interface IDestinationService {
     clientsecret: string;
 }
 
-async function getDestination (access_token: string, destinationName: string, ds: IDestinationService, jwtToken: string | null): Promise<IDestinationConfiguration> {
+async function getDestination (access_token: string, destinationName: string, ds: IDestinationService, jwtToken: string | null): Promise<IDestinationData> {
     const response = await axios({
         url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
         method: 'GET',
@@ -61,7 +69,7 @@ async function getDestination (access_token: string, destinationName: string, ds
         },
         responseType: 'json',
     });
-    return response.data.destinationConfiguration;
+    return response.data;
 }
 
 async function createToken (ds: IDestinationService): Promise<string> {
