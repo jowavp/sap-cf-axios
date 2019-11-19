@@ -2,8 +2,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { IDestinationConfiguration, IDestinationData } from './destination';
 import { readConnectivity } from './connectivity';
-// import {https} from 'https';
-// import ProxyAgent from 'https-proxy-agent';
 
 export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData) {
     
@@ -39,9 +37,6 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
             delete config.headers.authorization;
         }
     }
-
-    
-
 
     return {
         ...config,
