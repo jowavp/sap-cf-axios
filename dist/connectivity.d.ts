@@ -6,5 +6,5 @@ interface IConnectivityConfig {
         'SAP-Connectivity-SCC-Location_ID'?: string;
     };
 }
-export declare function readConnectivity(locationId?: string): Promise<IConnectivityConfig>;
+export declare function readConnectivity(locationId?: string, principalToken?: string): Promise<IConnectivityConfig>;
 export {};

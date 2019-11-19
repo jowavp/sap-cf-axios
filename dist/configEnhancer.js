@@ -20,12 +20,18 @@ function enhanceConfig(config, destination) {
             if (destination.authTokens[0].error) {
                 throw (new Error(destination.authTokens[0].error));
             }
-            config.headers = Object.assign(Object.assign({}, config.headers), { authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
+            config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
-            const connectivityValues = yield connectivity_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
+            const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
+                yield connectivity_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, config.headers['Authorization']) :
+                yield connectivity_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
+            // if it is principal propagation ... remove the original authentication header ...
+            if (destinationConfiguration.Authentication === "PrincipalPropagation") {
+                delete config.headers["Authorization"];
+            }
         }
         return Object.assign(Object.assign({}, config), { baseURL: destinationConfiguration.URL });
     });

@@ -43,7 +43,8 @@ async function createInstance(destinationName: string, instanceConfig?: AxiosReq
     instance.interceptors.request.use(
         async (config) => {
             // enhance config object with destination information
-            const destination = await readDestination(destinationName, config.headers["Authorization"]);
+            const auth = config.headers.Authorization || config.headers.authorization;
+            const destination = await readDestination(destinationName, auth);
             return enhanceConfig(config, destination);
         }
     );    

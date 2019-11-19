@@ -21,10 +21,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const xsenv = __importStar(require("@sap/xsenv"));
-function readConnectivity(locationId) {
+function readConnectivity(locationId, principalToken) {
     return __awaiter(this, void 0, void 0, function* () {
         const connectivityService = getService();
-        const access_token = yield createToken(connectivityService);
+        const access_token = yield createToken(connectivityService, principalToken);
         const proxy = {
             host: connectivityService.onpremise_proxy_host,
             port: parseInt(connectivityService.onpremise_proxy_port, 10),
@@ -43,8 +43,40 @@ function readConnectivity(locationId) {
     });
 }
 exports.readConnectivity = readConnectivity;
-function createToken(service) {
+function createToken(service, principalToken) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (principalToken) {
+            const refreshToken = (yield axios_1.default({
+                url: `${service.url}/oauth/token`,
+                method: 'POST',
+                responseType: 'json',
+                params: {
+                    grant_type: 'user_token',
+                    response_type: 'token',
+                    client_id: service.clientid
+                },
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': principalToken
+                },
+            })).data.refresh_token;
+            return (yield axios_1.default({
+                url: `${service.url}/oauth/token`,
+                method: 'POST',
+                responseType: 'json',
+                params: {
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken
+                },
+                headers: {
+                    'Accept': 'application/json'
+                },
+                auth: {
+                    username: service.clientid,
+                    password: service.clientsecret
+                }
+            })).data.access_token;
+        }
         return (yield axios_1.default({
             url: `${service.url}/oauth/token`,
             method: 'POST',

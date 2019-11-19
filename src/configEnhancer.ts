@@ -15,14 +15,16 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
        }
         config.headers = {
             ...config.headers,
-            authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`
+            Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`
         }
     }
 
     if( destinationConfiguration.ProxyType.toLowerCase() === "onpremise" ){
         // connect over the cloud connector
-        const connectivityValues = await readConnectivity(destinationConfiguration.CloudConnectorLocationId);
-
+        const connectivityValues = 
+        destinationConfiguration.Authentication === "PrincipalPropagation" ? 
+            await readConnectivity(destinationConfiguration.CloudConnectorLocationId, config.headers['Authorization']) :
+            await readConnectivity(destinationConfiguration.CloudConnectorLocationId);
         config = {
             ...config,
             proxy: connectivityValues.proxy,
@@ -31,7 +33,15 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
                 ...connectivityValues.headers
             }
         }
+        // if it is principal propagation ... remove the original authentication header ...
+        if(destinationConfiguration.Authentication === "PrincipalPropagation"){
+            delete config.headers.Authorization;
+            delete config.headers.authorization;
+        }
     }
+
+    
+
 
     return {
         ...config,

@@ -31,7 +31,7 @@ export interface IDestinationConfiguration {
     Name: string;
     Type: string;
     URL: string;
-    Authentication: "BasicAuthentication" | "OAuth2UserTokenExchange";
+    Authentication: "BasicAuthentication" | "OAuth2UserTokenExchange" | "PrincipalPropagation";
     ProxyType: string;
     CloudConnectorLocationId: string;
     Description: string;

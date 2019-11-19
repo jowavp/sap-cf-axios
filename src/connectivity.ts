@@ -9,9 +9,9 @@ interface IConnectivityConfig {
     }
 }
 
-export async function readConnectivity(locationId?: string) {
+export async function readConnectivity(locationId?: string, principalToken?: string) {
     const connectivityService = getService();
-    const access_token = await createToken(connectivityService);
+    const access_token = await createToken(connectivityService, principalToken);
     const proxy: AxiosProxyConfig = {
         host: connectivityService.onpremise_proxy_host,
         port: parseInt(connectivityService.onpremise_proxy_port, 10),
@@ -33,7 +33,40 @@ export async function readConnectivity(locationId?: string) {
 
 }
 
-async function createToken (service: IConnectivityService): Promise<string> {
+async function createToken (service: IConnectivityService, principalToken?: string): Promise<string> {
+    if( principalToken ){
+        const refreshToken = (await axios({
+            url: `${service.url}/oauth/token`,
+            method: 'POST',
+            responseType: 'json',
+            params: {
+                grant_type: 'user_token',
+                response_type: 'token',
+                client_id: service.clientid
+            },
+            headers: { 
+                'Accept': 'application/json',
+                'Authorization': principalToken
+            },
+            
+        })).data.refresh_token;
+        return (await axios({
+            url: `${service.url}/oauth/token`,
+            method: 'POST',
+            responseType: 'json',
+            params: {
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken
+            },
+            headers: { 
+                'Accept': 'application/json'
+            },
+            auth: {
+                username: service.clientid,
+                password: service.clientsecret
+            }
+        })).data.access_token;
+    }
     return (await axios({
         url: `${service.url}/oauth/token`,
         method: 'POST',
