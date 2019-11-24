@@ -58,7 +58,8 @@ function createInstance(destinationName, instanceConfig) {
         // we return the destination configuration in the response.
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
             // enhance config object with destination information
-            const destination = yield destination_1.readDestination(destinationName, config.headers["Authorization"]);
+            const auth = config.headers.Authorization || config.headers.authorization;
+            const destination = yield destination_1.readDestination(destinationName, auth);
             return configEnhancer_1.default(config, destination);
         }));
         return instance;

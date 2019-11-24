@@ -7,13 +7,20 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
     
    // add auth header
    const {destinationConfiguration} = destination;
-   if (destination.authTokens && destination.authTokens[0]){
+   if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error){
        if(destination.authTokens[0].error){
            throw( new Error(destination.authTokens[0].error) );
        }
         config.headers = {
             ...config.headers,
             Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`
+        }
+    }
+    if(destinationConfiguration.Authentication === "OAuth2ClientCredentials"){
+        const clientCredentialsToken = await createToken(destinationConfiguration);
+        config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${clientCredentialsToken}`
         }
     }
 
@@ -43,3 +50,18 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
         baseURL: destinationConfiguration.URL
     }
 }
+
+
+async function createToken (dc: IDestinationConfiguration): Promise<string> {
+    return (await axios({
+        url: `${dc.tokenServiceURL}`,
+        method: 'POST',
+        responseType: 'json',
+        data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: {
+            username: dc.clientId,
+            password: dc.clientSecret
+        }
+    })).data.access_token;
+};

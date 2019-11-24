@@ -56,3 +56,26 @@ For connecting to a destination as the current user, we send the current JWT tok
         });
 ```
 > **NOTE:** The JWT Token sent to the backend does not contain the properties name, login_name or mail. If you use principal propagation in the cloud connector you have to use ${email} or ${user_name} in the client certificate template 
+
+### Handle X-CSRF-Token
+To handle a POST request to for example CPI you can just set the name of the CSRF-Token header and the library will first do an OPTIONS call to the same URL to fetch the token and will add it to the request.
+```js
+const {SapCfAxios} = require('sap-cf-axios');
+const cpi = SapCfAxios("cpi_destination_name");
+
+var authorization = req.headers.authorization;
+
+const response = await cpi({
+        method: 'POST',
+        url: '/Bookset',
+        headers: {
+            "content-type": "application/json"
+        },
+            data: {
+            title: "Using Axios in SAP Cloud Foundry",
+            author: "Joachim Van Praet"
+        }
+        xsrfHeaderName: "x-csrf-token",
+        data: {vatNumber},
+    });
+```

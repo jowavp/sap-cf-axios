@@ -10,8 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const connectivity_1 = require("./connectivity");
-// import {https} from 'https';
-// import ProxyAgent from 'https-proxy-agent';
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
@@ -30,7 +28,8 @@ function enhanceConfig(config, destination) {
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...
             if (destinationConfiguration.Authentication === "PrincipalPropagation") {
-                delete config.headers["Authorization"];
+                delete config.headers.Authorization;
+                delete config.headers.authorization;
             }
         }
         return Object.assign(Object.assign({}, config), { baseURL: destinationConfiguration.URL });
