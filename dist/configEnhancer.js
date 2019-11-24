@@ -8,17 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
 const connectivity_1 = require("./connectivity");
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
         const { destinationConfiguration } = destination;
-        if (destination.authTokens && destination.authTokens[0]) {
+        if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error) {
             if (destination.authTokens[0].error) {
                 throw (new Error(destination.authTokens[0].error));
             }
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
+        }
+        if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
+            const clientCredentialsToken = yield createToken(destinationConfiguration);
+            config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
@@ -36,3 +44,19 @@ function enhanceConfig(config, destination) {
     });
 }
 exports.default = enhanceConfig;
+function createToken(dc) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return (yield axios_1.default({
+            url: `${dc.tokenServiceURL}`,
+            method: 'POST',
+            responseType: 'json',
+            data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            auth: {
+                username: dc.clientId,
+                password: dc.clientSecret
+            }
+        })).data.access_token;
+    });
+}
+;
