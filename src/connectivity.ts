@@ -18,14 +18,14 @@ export async function readConnectivity(locationId?: string, principalToken?: str
         protocol: 'http'
     };
 
-    const result:IConnectivityConfig = {
+    const result: IConnectivityConfig = {
         proxy,
         headers: {
-            'Proxy-Authorization': `Bearer ${access_token}`    
+            'Proxy-Authorization': `Bearer ${access_token}`
         }
     }
 
-    if(locationId) {
+    if (locationId) {
         result.headers["SAP-Connectivity-SCC-Location_ID"] = locationId;
     }
 
@@ -33,8 +33,8 @@ export async function readConnectivity(locationId?: string, principalToken?: str
 
 }
 
-async function createToken (service: IConnectivityService, principalToken?: string): Promise<string> {
-    if( principalToken ){
+async function createToken(service: IConnectivityService, principalToken?: string): Promise<string> {
+    if (principalToken) {
         const refreshToken = (await axios({
             url: `${service.url}/oauth/token`,
             method: 'POST',
@@ -44,11 +44,11 @@ async function createToken (service: IConnectivityService, principalToken?: stri
                 response_type: 'token',
                 client_id: service.clientid
             },
-            headers: { 
+            headers: {
                 'Accept': 'application/json',
                 'Authorization': principalToken
             },
-            
+
         })).data.refresh_token;
         return (await axios({
             url: `${service.url}/oauth/token`,
@@ -58,7 +58,7 @@ async function createToken (service: IConnectivityService, principalToken?: stri
                 grant_type: 'refresh_token',
                 refresh_token: refreshToken
             },
-            headers: { 
+            headers: {
                 'Accept': 'application/json'
             },
             auth: {
@@ -80,8 +80,8 @@ async function createToken (service: IConnectivityService, principalToken?: stri
     })).data.access_token;
 };
 
-function getService(): IConnectivityService{
-    const {connectivity} = xsenv.getServices({
+function getService(): IConnectivityService {
+    const { connectivity } = xsenv.getServices({
         connectivity: {
             tag: 'connectivity'
         }

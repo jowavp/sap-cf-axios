@@ -5,7 +5,7 @@ import * as xsenv from '@sap/xsenv';
 export async function readDestination(destinationName: string, authorizationHeader: string) {
 
     const access_token = await createToken(getService());
-    
+
     // if we have a JWT token, we send it to the destination service to generate the new authorization header
     const jwtToken = /bearer /i.test(authorizationHeader) ? authorizationHeader.replace(/bearer /i, "") : null;
     return getDestination(access_token, destinationName, getService(), jwtToken);
@@ -18,7 +18,7 @@ export interface IDestinationData {
         "InstanceId": string;
     },
     "destinationConfiguration": IDestinationConfiguration,
-    "authTokens": 
+    "authTokens":
     {
         type: string;
         value: string;
@@ -31,7 +31,7 @@ export interface IDestinationConfiguration {
     Name: string;
     Type: string;
     URL: string;
-    Authentication: "BasicAuthentication" | "OAuth2UserTokenExchange" | "PrincipalPropagation" | "OAuth2ClientCredentials";
+    Authentication: "NoAuthentication" | "BasicAuthentication" | "OAuth2UserTokenExchange" | "OAuth2SAMLBearerAssertion" | "PrincipalPropagation" | "OAuth2ClientCredentials";
     ProxyType: string;
     CloudConnectorLocationId: string;
     Description: string;
@@ -59,20 +59,20 @@ interface IDestinationService {
     clientsecret: string;
 }
 
-async function getDestination (access_token: string, destinationName: string, ds: IDestinationService, jwtToken: string | null): Promise<IDestinationData> {
+async function getDestination(access_token: string, destinationName: string, ds: IDestinationService, jwtToken: string | null): Promise<IDestinationData> {
     const response = await axios({
         url: `${ds.uri}/destination-configuration/v1/destinations/${destinationName}`,
         method: 'GET',
-        headers: { 
+        headers: {
             'Authorization': `Bearer ${access_token}`,
-            'X-user-token':  jwtToken
+            'X-user-token': jwtToken
         },
         responseType: 'json',
     });
     return response.data;
 }
 
-async function createToken (ds: IDestinationService): Promise<string> {
+async function createToken(ds: IDestinationService): Promise<string> {
     return (await axios({
         url: `${ds.url}/oauth/token`,
         method: 'POST',
@@ -86,8 +86,8 @@ async function createToken (ds: IDestinationService): Promise<string> {
     })).data.access_token;
 };
 
-function getService(): IDestinationService{
-    const {destination} = xsenv.getServices({
+function getService(): IDestinationService {
+    const { destination } = xsenv.getServices({
         destination: {
             tag: 'destination'
         }
