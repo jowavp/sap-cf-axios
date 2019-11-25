@@ -18,15 +18,15 @@ function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
         const { destinationConfiguration } = destination;
+        if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
+            const clientCredentialsToken = yield createToken(destinationConfiguration);
+            config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });
+        }
         if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error) {
             if (destination.authTokens[0].error) {
                 throw (new Error(destination.authTokens[0].error));
             }
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
-        }
-        if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
-            const clientCredentialsToken = yield createToken(destinationConfiguration);
-            config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
@@ -35,6 +35,7 @@ function enhanceConfig(config, destination) {
                 yield connectivity_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...
+            // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 
             if (destinationConfiguration.Authentication === "PrincipalPropagation") {
                 delete config.headers.Authorization;
                 delete config.headers.authorization;

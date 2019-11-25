@@ -19,9 +19,9 @@ export function SapCfAxios(destination: string) {
                 }
             };
             var { headers } = await (await instance)(tokenReq);
+            // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
             if (!req.headers) req.headers = {};
-            req.headers['x-csrf-token'] = headers['x-csrf-token'];
-            return (await instance)(req)
+            req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
         }
         return (await instance)(req)
     }
