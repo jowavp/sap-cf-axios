@@ -5,6 +5,7 @@ You can address destinations pointing to Internet and onPremise systems. The lib
 
 If you want to connect with the current user (e.g. with principal propagation) just send the JWT token to the destination in the authorization header.
 
+
 ## Installation
 using npm:
 
@@ -14,8 +15,9 @@ $ npm install -s sap-cf-axios
 
 ## Example
 
-### None or Basic Authentication
-The most simple example with a destination pointing to a service with no authentication or with basic authentication.
+### None, Basic or Oauth2ClientCredentials Authentication
+The most simple example with a destination pointing to a service where we connect with fixed credentials.
+We do not need to send the current user with the request.
 
 ```js    
 const {SapCfAxios} = require('sap-cf-axios');
@@ -34,7 +36,7 @@ axios({
 });
 ```
 
-### OAuth2* and Principal Propagation
+### OAuth2SAMLDearerAssertion, OAuth2UserTokenExchange and Principal Propagation
 
 For connecting to a destination as the current user, we send the current JWT token in the authorization header of the request.
 ```js
