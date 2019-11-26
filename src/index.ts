@@ -1,4 +1,4 @@
-import { readDestination } from 'sap-cf-destconn'
+import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import * as tough from 'tough-cookie';
@@ -43,7 +43,7 @@ async function createInstance(destinationName: string, instanceConfig?: AxiosReq
         async (config) => {
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
-            const destination = await readDestination(destinationName, auth);
+            const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth);
             return enhanceConfig(config, destination);
         }
     );

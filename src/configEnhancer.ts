@@ -1,11 +1,11 @@
 
 import axios, { AxiosRequestConfig } from 'axios';
-import { readConnectivity, IDestinationConfiguration, IDestinationData } from 'sap-cf-destconn';
+import { readConnectivity, IDestinationConfiguration, IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn';
 
-export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData) {
+export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData<IHTTPDestinationConfiguration>) {
 
     // add auth header
-    const { destinationConfiguration } = destination;
+    const destinationConfiguration = destination.destinationConfiguration;
 
     if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
         const clientCredentialsToken = await createToken(destinationConfiguration);
@@ -54,7 +54,7 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 }
 
 
-async function createToken(dc: IDestinationConfiguration): Promise<string> {
+async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     return (await axios({
         url: `${dc.tokenServiceURL}`,
         method: 'POST',
