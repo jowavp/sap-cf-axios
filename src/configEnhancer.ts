@@ -1,7 +1,6 @@
 
 import axios, { AxiosRequestConfig } from 'axios';
-import { IDestinationConfiguration, IDestinationData } from './destination';
-import { readConnectivity } from './connectivity';
+import { readConnectivity, IDestinationConfiguration, IDestinationData } from 'sap-cf-destconn';
 
 export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData) {
 

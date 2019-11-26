@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
-const connectivity_1 = require("./connectivity");
+const sap_cf_destconn_1 = require("sap-cf-destconn");
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
@@ -31,8 +31,8 @@ function enhanceConfig(config, destination) {
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
             const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                yield connectivity_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, config.headers['Authorization']) :
-                yield connectivity_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
+                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, config.headers['Authorization']) :
+                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...
             // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 

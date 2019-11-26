@@ -1,4 +1,4 @@
-import { readDestination } from './destination'
+import { readDestination } from 'sap-cf-destconn'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import * as tough from 'tough-cookie';
@@ -6,8 +6,8 @@ import enhanceConfig from './configEnhancer';
 
 declare var exports: any;
 
-export function SapCfAxios(destination: string) {
-    const instance = createInstance(destination);
+export function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig) {
+    const instance = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName) {
             // handle x-csrf-Token

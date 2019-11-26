@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { IDestinationData } from './destination';
+import { IDestinationData } from 'sap-cf-destconn';
 export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData): Promise<{
     baseURL: string;
     url?: string | undefined;

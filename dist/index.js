@@ -19,13 +19,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const destination_1 = require("./destination");
+const sap_cf_destconn_1 = require("sap-cf-destconn");
 const axios_1 = __importDefault(require("axios"));
 const axios_cookiejar_support_1 = __importDefault(require("axios-cookiejar-support"));
 const tough = __importStar(require("tough-cookie"));
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
-function SapCfAxios(destination) {
-    const instance = createInstance(destination);
+function SapCfAxios(destination, instanceConfig) {
+    const instance = createInstance(destination, instanceConfig);
     return (req) => __awaiter(this, void 0, void 0, function* () {
         if (req.xsrfHeaderName) {
             // handle x-csrf-Token
@@ -37,10 +37,10 @@ function SapCfAxios(destination) {
                 }
             };
             var { headers } = yield (yield instance)(tokenReq);
+            // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
             if (!req.headers)
                 req.headers = {};
-            req.headers['x-csrf-token'] = headers['x-csrf-token'];
-            return (yield instance)(req);
+            req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
         }
         return (yield instance)(req);
     });
@@ -59,7 +59,7 @@ function createInstance(destinationName, instanceConfig) {
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
-            const destination = yield destination_1.readDestination(destinationName, auth);
+            const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth);
             return configEnhancer_1.default(config, destination);
         }));
         return instance;
