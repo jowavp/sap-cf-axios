@@ -6,7 +6,7 @@ import enhanceConfig from './configEnhancer';
 
 declare var exports: any;
 
-export function SapCfAxios(destination: string) {
+export default function SapCfAxios(destination: string) {
     const instance = createInstance(destination);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName) {
@@ -26,7 +26,7 @@ export function SapCfAxios(destination: string) {
         return (await instance)(req)
     }
 }
-exports = SapCfAxios;
+// exports = SapCfAxios;
 
 async function createInstance(destinationName: string, instanceConfig?: AxiosRequestConfig) {
 

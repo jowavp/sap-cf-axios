@@ -20,7 +20,7 @@ The most simple example with a destination pointing to a service where we connec
 We do not need to send the current user with the request.
 
 ```js    
-const {SapCfAxios} = require('sap-cf-axios');
+const SapCfAxios = require('sap-cf-axios').default;
 
 const axios = SapCfAxios("<destinationName>");
 axios({
@@ -40,7 +40,7 @@ axios({
 
 For connecting to a destination as the current user, we send the current JWT token in the authorization header of the request.
 ```js
-    const {SapCfAxios} = require('sap-cf-axios');
+    const SapCfAxios = require('sap-cf-axios').default;
     const axios = SapCfAxios("<destinationName>");
     
     var authorization = req.headers.authorization;
@@ -62,7 +62,7 @@ For connecting to a destination as the current user, we send the current JWT tok
 ### Handle X-CSRF-Token
 To handle a POST request to for example CPI you can just set the name of the CSRF-Token header and the library will first do an OPTIONS call to the same URL to fetch the token and will add it to the request.
 ```js
-const {SapCfAxios} = require('sap-cf-axios');
+const SapCfAxios = require('sap-cf-axios').default;
 const cpi = SapCfAxios("cpi_destination_name");
 
 var authorization = req.headers.authorization;

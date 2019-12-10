@@ -37,15 +37,15 @@ function SapCfAxios(destination) {
                 }
             };
             var { headers } = yield (yield instance)(tokenReq);
+            // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
             if (!req.headers)
                 req.headers = {};
-            req.headers['x-csrf-token'] = headers['x-csrf-token'];
-            return (yield instance)(req);
+            req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
         }
         return (yield instance)(req);
     });
 }
-exports.SapCfAxios = SapCfAxios;
+exports.default = SapCfAxios;
 exports = SapCfAxios;
 function createInstance(destinationName, instanceConfig) {
     return __awaiter(this, void 0, void 0, function* () {
