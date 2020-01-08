@@ -6,10 +6,10 @@ import enhanceConfig from './configEnhancer';
 
 declare var exports: any;
 
-export function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig) {
+export default function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig) {
     const instance = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-        if (req.xsrfHeaderName) {
+        if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
             // handle x-csrf-Token
             var tokenReq: AxiosRequestConfig = {
                 url: req.url || "",
@@ -20,13 +20,15 @@ export function SapCfAxios(destination: string, instanceConfig?: AxiosRequestCon
             };
             var { headers } = await (await instance)(tokenReq);
             // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
-            if (!req.headers) req.headers = {};
-            req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
+            if (headers) {
+                if (!req.headers) req.headers = {};
+                req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
+            }
         }
         return (await instance)(req)
     }
 }
-exports = SapCfAxios;
+// exports = SapCfAxios;
 
 async function createInstance(destinationName: string, instanceConfig?: AxiosRequestConfig) {
 

@@ -17,7 +17,7 @@ const sap_cf_destconn_1 = require("sap-cf-destconn");
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
-        const { destinationConfiguration } = destination;
+        const destinationConfiguration = destination.destinationConfiguration;
         if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
             const clientCredentialsToken = yield createToken(destinationConfiguration);
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });

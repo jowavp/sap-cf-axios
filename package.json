@@ -1,12 +1,12 @@
 {
   "name": "sap-cf-axios",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "description": "Wrap axios to use the SAP Cloud Foundry destination Service",
   "main": "dist/index.js",
   "files": [
     "dist/**/*"
   ],
-  "types": "lib/index.d.ts",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jowavp/sap-cf-axios.git"

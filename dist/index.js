@@ -27,7 +27,7 @@ const configEnhancer_1 = __importDefault(require("./configEnhancer"));
 function SapCfAxios(destination, instanceConfig) {
     const instance = createInstance(destination, instanceConfig);
     return (req) => __awaiter(this, void 0, void 0, function* () {
-        if (req.xsrfHeaderName) {
+        if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
             // handle x-csrf-Token
             var tokenReq = {
                 url: req.url || "",
@@ -38,15 +38,17 @@ function SapCfAxios(destination, instanceConfig) {
             };
             var { headers } = yield (yield instance)(tokenReq);
             // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
-            if (!req.headers)
-                req.headers = {};
-            req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
+            if (headers) {
+                if (!req.headers)
+                    req.headers = {};
+                req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
+            }
         }
         return (yield instance)(req);
     });
 }
-exports.SapCfAxios = SapCfAxios;
-exports = SapCfAxios;
+exports.default = SapCfAxios;
+// exports = SapCfAxios;
 function createInstance(destinationName, instanceConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         // we will add an interceptor to axios that will take care of the destination configuration
