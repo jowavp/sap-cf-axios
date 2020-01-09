@@ -27,5 +27,4 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     httpsAgent?: any;
     proxy?: false | import("axios").AxiosProxyConfig | undefined;
     cancelToken?: import("axios").CancelToken | undefined;
-    jar?: boolean | import("tough-cookie").CookieJar | undefined;
 }>;

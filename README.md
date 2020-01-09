@@ -81,3 +81,27 @@ const response = await cpi({
         data: {vatNumber},
     });
 ```
+
+If you want to use another method or url for fetching the X-CSRF-Token.
+You can add this configuration as a third parameter to the constructor.
+```js
+const SapCfAxios = require('sap-cf-axios').default;
+const cpi = SapCfAxios( /* destination name */ "cpi_destination_name", /* axios default config */ null, /* xsrfConfig */ {method: 'get', url:'/'});
+
+var authorization = req.headers.authorization;
+
+const response = await cpi({
+        method: 'POST',
+        url: '/Bookset',
+        headers: {
+            "content-type": "application/json"
+        },
+            data: {
+            title: "Using Axios in SAP Cloud Foundry",
+            author: "Joachim Van Praet"
+        }
+        xsrfHeaderName: "x-csrf-token",
+        data: {vatNumber},
+    });
+```
+
