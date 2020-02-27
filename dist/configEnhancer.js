@@ -21,17 +21,20 @@ function enhanceConfig(config, destination) {
         if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
             const clientCredentialsToken = yield createToken(destinationConfiguration);
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });
+            delete config.headers.authorization;
         }
         if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error) {
             if (destination.authTokens[0].error) {
                 throw (new Error(destination.authTokens[0].error));
             }
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
+            delete config.headers.authorization;
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
+            const authHeader = config.headers['Authorization'] || config.headers['authorization'];
             const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, config.headers['Authorization']) :
+                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
                 yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...

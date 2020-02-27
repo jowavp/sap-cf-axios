@@ -13,6 +13,7 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
             ...config.headers,
             Authorization: `Bearer ${clientCredentialsToken}`
         }
+        delete config.headers.authorization;
     }
 
     if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error) {
@@ -23,14 +24,17 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
             ...config.headers,
             Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`
         }
+        delete config.headers.authorization;
     }
 
     if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
         // connect over the cloud connector
+        const authHeader = config.headers['Authorization'] || config.headers['authorization'];
         const connectivityValues =
             destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                await readConnectivity(destinationConfiguration.CloudConnectorLocationId, config.headers['Authorization']) :
+                await readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
                 await readConnectivity(destinationConfiguration.CloudConnectorLocationId);
+
         config = {
             ...config,
             proxy: connectivityValues.proxy,
@@ -39,6 +43,8 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
                 ...connectivityValues.headers
             }
         }
+
+
         // if it is principal propagation ... remove the original authentication header ...
         // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 
         if (destinationConfiguration.Authentication === "PrincipalPropagation") {
