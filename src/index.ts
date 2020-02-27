@@ -7,7 +7,7 @@ import enhanceConfig from './configEnhancer';
 declare var exports: any;
 
 export default function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
-    const instance = createInstance(destination, instanceConfig);
+    const instanceProm = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
             // handle x-csrf-Token
@@ -22,7 +22,7 @@ export default function SapCfAxios(destination: string, instanceConfig?: AxiosRe
                 }
             };
             try{
-                const { headers } = await (await instance)(tokenReq);
+                const { headers } = await (await instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
     
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
@@ -36,7 +36,7 @@ export default function SapCfAxios(destination: string, instanceConfig?: AxiosRe
             }
             
         }
-        return (await instance)(req)
+        return (await instanceProm)(req)
     }
 }
 // exports = SapCfAxios;
@@ -56,8 +56,13 @@ async function createInstance(destinationName: string, instanceConfig?: AxiosReq
         async (config) => {
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
-            const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth);
-            return enhanceConfig(config, destination);
+            try{
+                const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth);
+                return await enhanceConfig(config, destination);
+            } catch( e) {
+                console.error('unable to connect to the destination', e)
+                throw e;
+            }
         }
     );
 

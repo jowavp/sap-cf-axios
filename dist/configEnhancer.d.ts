@@ -3,7 +3,7 @@ import { IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn
 export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData<IHTTPDestinationConfiguration>): Promise<{
     baseURL: string;
     url?: string | undefined;
-    method?: "head" | "get" | "GET" | "delete" | "DELETE" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | undefined;
+    method?: "link" | "head" | "get" | "GET" | "delete" | "DELETE" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | "LINK" | "unlink" | "UNLINK" | undefined;
     transformRequest?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
     transformResponse?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
     headers?: any;
@@ -11,6 +11,7 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     paramsSerializer?: ((params: any) => string) | undefined;
     data?: any;
     timeout?: number | undefined;
+    timeoutErrorMessage?: string | undefined;
     withCredentials?: boolean | undefined;
     adapter?: import("axios").AxiosAdapter | undefined;
     auth?: import("axios").AxiosBasicCredentials | undefined;

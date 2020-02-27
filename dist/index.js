@@ -18,7 +18,7 @@ const axios_1 = __importDefault(require("axios"));
 // import * as tough from 'tough-cookie';
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
 function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
-    const instance = createInstance(destination, instanceConfig);
+    const instanceProm = createInstance(destination, instanceConfig);
     return (req) => __awaiter(this, void 0, void 0, function* () {
         if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
             // handle x-csrf-Token
@@ -32,7 +32,7 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
                 }
             };
             try {
-                const { headers } = yield (yield instance)(tokenReq);
+                const { headers } = yield (yield instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
@@ -48,7 +48,7 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
                 console.log(err);
             }
         }
-        return (yield instance)(req);
+        return (yield instanceProm)(req);
     });
 }
 exports.default = SapCfAxios;
@@ -65,8 +65,14 @@ function createInstance(destinationName, instanceConfig) {
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
-            const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth);
-            return configEnhancer_1.default(config, destination);
+            try {
+                const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth);
+                return yield configEnhancer_1.default(config, destination);
+            }
+            catch (e) {
+                console.error('unable to connect to the destination', e);
+                throw e;
+            }
         }));
         return instance;
     });
