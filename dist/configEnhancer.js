@@ -50,6 +50,23 @@ function enhanceConfig(config, destination) {
 exports.default = enhanceConfig;
 function createToken(dc) {
     return __awaiter(this, void 0, void 0, function* () {
+        const scope = convertScope(dc.Scope || dc.scope);
+        if (scope) {
+            return (yield axios_1.default({
+                url: `${dc.tokenServiceURL}`,
+                method: 'POST',
+                responseType: 'json',
+                data: {
+                    "grant_type": "client_credentials",
+                    scope
+                },
+                headers: { 'Content-Type': 'application/json' },
+                auth: {
+                    username: dc.clientId,
+                    password: dc.clientSecret
+                }
+            })).data.access_token;
+        }
         return (yield axios_1.default({
             url: `${dc.tokenServiceURL}`,
             method: 'POST',
@@ -64,3 +81,11 @@ function createToken(dc) {
     });
 }
 ;
+function convertScope(scope) {
+    if (!scope)
+        return null;
+    return scope.split(" ").map((sc) => sc.split(':')).reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+    }, {});
+}

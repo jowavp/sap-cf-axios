@@ -59,8 +59,25 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
     }
 }
 
-
 async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
+    const scope = convertScope(dc.Scope || dc.scope);
+    
+    if(scope){
+        return (await axios({
+            url: `${dc.tokenServiceURL}`,
+            method: 'POST',
+            responseType: 'json',
+            data: {
+                "grant_type": "client_credentials",
+                scope
+            },
+            headers: { 'Content-Type': 'application/json' },
+            auth: {
+                username: dc.clientId,
+                password: dc.clientSecret
+            }
+        })).data.access_token;
+    }
     return (await axios({
         url: `${dc.tokenServiceURL}`,
         method: 'POST',
@@ -73,3 +90,16 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
         }
     })).data.access_token;
 };
+
+function convertScope (scope?: String) {
+    if(!scope) return null;
+    return scope.split(" ").map<string[]>(
+        (sc) => sc.split(':')
+    ).reduce<{[key: string]: string}>(
+        (acc, [key, value]) => {
+            acc[key] = value;
+            return acc;
+        }, {}
+    )
+
+}
