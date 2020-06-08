@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const sap_cf_destconn_1 = require("sap-cf-destconn");
+const tokenCache = {};
 function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
@@ -51,33 +52,48 @@ exports.default = enhanceConfig;
 function createToken(dc) {
     return __awaiter(this, void 0, void 0, function* () {
         const scope = convertScope(dc.Scope || dc.scope);
-        if (scope) {
-            return (yield axios_1.default({
+        const audience = dc.oauth_audience;
+        let token;
+        if (tokenCache[dc.Name] && tokenCache[dc.Name].expires.getTime() > new Date().getTime()) {
+            return tokenCache[dc.Name].value;
+        }
+        if (scope || audience) {
+            token = (yield axios_1.default({
                 url: `${dc.tokenServiceURL}`,
                 method: 'POST',
                 responseType: 'json',
                 data: {
                     "grant_type": "client_credentials",
-                    scope
+                    scope,
+                    audience
                 },
                 headers: { 'Content-Type': 'application/json' },
                 auth: {
                     username: dc.clientId,
                     password: dc.clientSecret
                 }
-            })).data.access_token;
+            })).data;
         }
-        return (yield axios_1.default({
-            url: `${dc.tokenServiceURL}`,
-            method: 'POST',
-            responseType: 'json',
-            data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            auth: {
-                username: dc.clientId,
-                password: dc.clientSecret
-            }
-        })).data.access_token;
+        else {
+            token = (yield axios_1.default({
+                url: `${dc.tokenServiceURL}`,
+                method: 'POST',
+                responseType: 'json',
+                data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                auth: {
+                    username: dc.clientId,
+                    password: dc.clientSecret
+                }
+            })).data;
+        }
+        // cache the token
+        const timeObject = new Date();
+        tokenCache[dc.Name] = {
+            value: token.access_token,
+            expires: new Date(timeObject.getTime() + 1000 * token.expires_in)
+        };
+        return token.access_token;
     });
 }
 ;

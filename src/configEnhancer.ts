@@ -2,6 +2,10 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { readConnectivity, IDestinationConfiguration, IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn';
 
+const tokenCache: {[key: string]: {value: string, expires: Date}} = {
+
+}
+
 export default async function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData<IHTTPDestinationConfiguration>) {
 
     // add auth header
@@ -61,34 +65,53 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
 async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     const scope = convertScope(dc.Scope || dc.scope);
-    
-    if(scope){
-        return (await axios({
+    const audience = dc.oauth_audience;
+    let token;
+
+    if( tokenCache[dc.Name] && tokenCache[dc.Name].expires.getTime() > new Date().getTime() ){
+        return tokenCache[dc.Name].value;
+    }
+
+    if(scope || audience){
+        token = (await axios({
             url: `${dc.tokenServiceURL}`,
             method: 'POST',
             responseType: 'json',
             data: {
                 "grant_type": "client_credentials",
-                scope
+                scope,
+                audience
             },
             headers: { 'Content-Type': 'application/json' },
             auth: {
                 username: dc.clientId,
                 password: dc.clientSecret
             }
-        })).data.access_token;
+        })).data;
+    } else {
+        token = (await axios({
+            url: `${dc.tokenServiceURL}`,
+            method: 'POST',
+            responseType: 'json',
+            data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            auth: {
+                username: dc.clientId,
+                password: dc.clientSecret
+            }
+        })).data
     }
-    return (await axios({
-        url: `${dc.tokenServiceURL}`,
-        method: 'POST',
-        responseType: 'json',
-        data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        auth: {
-            username: dc.clientId,
-            password: dc.clientSecret
-        }
-    })).data.access_token;
+
+    // cache the token
+    const timeObject = new Date(); 
+    
+
+    tokenCache[dc.Name] = {
+        value: token.access_token,
+        expires: new Date(timeObject.getTime() + 1000 * token.expires_in)
+    }
+
+    return token.access_token;
 };
 
 function convertScope (scope?: String) {
