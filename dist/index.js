@@ -66,7 +66,7 @@ function createInstance(destinationName, instanceConfig) {
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
             try {
-                const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth);
+                const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
                 return yield configEnhancer_1.default(config, destination);
             }
             catch (e) {

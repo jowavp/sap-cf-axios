@@ -6,7 +6,11 @@ import enhanceConfig from './configEnhancer';
 
 declare var exports: any;
 
-export default function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
+interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
+    subscribedDomain?: string;
+}
+
+export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
     const instanceProm = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
@@ -41,7 +45,7 @@ export default function SapCfAxios(destination: string, instanceConfig?: AxiosRe
 }
 // exports = SapCfAxios;
 
-async function createInstance(destinationName: string, instanceConfig?: AxiosRequestConfig) {
+async function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequestConfig) {
 
     // we will add an interceptor to axios that will take care of the destination configuration
     const instance = axios.create(instanceConfig);
@@ -57,7 +61,7 @@ async function createInstance(destinationName: string, instanceConfig?: AxiosReq
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
             try{
-                const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth);
+                const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth, (instanceConfig || {}).subscribedDomain);
                 return await enhanceConfig(config, destination);
             } catch( e) {
                 console.error('unable to connect to the destination', e)

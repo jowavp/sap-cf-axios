@@ -68,8 +68,9 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     const audience = dc.oauth_audience;
     let token;
 
-    if( tokenCache[dc.Name] && tokenCache[dc.Name].expires.getTime() > new Date().getTime() ){
-        return tokenCache[dc.Name].value;
+    const cacheKey = `${dc.Name}_${dc.tokenServiceURL}`;
+    if( tokenCache[cacheKey] && tokenCache[cacheKey].expires.getTime() > new Date().getTime() ){
+        return tokenCache[cacheKey].value;
     }
 
     if(scope || audience){
@@ -106,7 +107,7 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     const timeObject = new Date(); 
     
 
-    tokenCache[dc.Name] = {
+    tokenCache[cacheKey] = {
         value: token.access_token,
         expires: new Date(timeObject.getTime() + 1000 * token.expires_in)
     }

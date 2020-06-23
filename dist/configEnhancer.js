@@ -54,8 +54,9 @@ function createToken(dc) {
         const scope = convertScope(dc.Scope || dc.scope);
         const audience = dc.oauth_audience;
         let token;
-        if (tokenCache[dc.Name] && tokenCache[dc.Name].expires.getTime() > new Date().getTime()) {
-            return tokenCache[dc.Name].value;
+        const cacheKey = `${dc.Name}_${dc.tokenServiceURL}`;
+        if (tokenCache[cacheKey] && tokenCache[cacheKey].expires.getTime() > new Date().getTime()) {
+            return tokenCache[cacheKey].value;
         }
         if (scope || audience) {
             token = (yield axios_1.default({
@@ -89,7 +90,7 @@ function createToken(dc) {
         }
         // cache the token
         const timeObject = new Date();
-        tokenCache[dc.Name] = {
+        tokenCache[cacheKey] = {
             value: token.access_token,
             expires: new Date(timeObject.getTime() + 1000 * token.expires_in)
         };
