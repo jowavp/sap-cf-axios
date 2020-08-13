@@ -1,14 +1,33 @@
 import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
-// import axiosCookieJarSupport from 'axios-cookiejar-support';
-// import * as tough from 'tough-cookie';
+import NodeCache from 'node-cache';
+
 import enhanceConfig from './configEnhancer';
 
 declare var exports: any;
+const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
 
-interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
+export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
     subscribedDomain?: string;
 }
+
+export {AxiosResponse, AxiosRequestConfig} from 'axios';
+
+export function getSapCfAxiosInstance (destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
+    const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
+    if(!instanceCache.has(cacheKey)){
+      instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
+    }
+    const instance = instanceCache.get<<T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>>(cacheKey);
+    if(!instance){
+        throw 'unable to get the destination instance';
+    }
+    return instance;
+  }
+
+  export function flushCache () {
+      return instanceCache.flushAll();
+  }
 
 export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
     const instanceProm = createInstance(destination, instanceConfig);

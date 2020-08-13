@@ -12,11 +12,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.flushCache = exports.getSapCfAxiosInstance = void 0;
 const sap_cf_destconn_1 = require("sap-cf-destconn");
 const axios_1 = __importDefault(require("axios"));
-// import axiosCookieJarSupport from 'axios-cookiejar-support';
-// import * as tough from 'tough-cookie';
+const node_cache_1 = __importDefault(require("node-cache"));
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
+const instanceCache = new node_cache_1.default({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
+function getSapCfAxiosInstance(destination, instanceConfig, xsrfConfig = 'options') {
+    const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
+    if (!instanceCache.has(cacheKey)) {
+        instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
+    }
+    const instance = instanceCache.get(cacheKey);
+    if (!instance) {
+        throw 'unable to get the destination instance';
+    }
+    return instance;
+}
+exports.getSapCfAxiosInstance = getSapCfAxiosInstance;
+function flushCache() {
+    return instanceCache.flushAll();
+}
+exports.flushCache = flushCache;
 function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
     const instanceProm = createInstance(destination, instanceConfig);
     return (req) => __awaiter(this, void 0, void 0, function* () {
