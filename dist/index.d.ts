@@ -12,3 +12,4 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
     method: Method;
     url: string;
 }): <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+export declare function logAxiosError(error: any): void;

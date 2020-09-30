@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.flushCache = exports.getSapCfAxiosInstance = void 0;
+exports.logAxiosError = exports.flushCache = exports.getSapCfAxiosInstance = void 0;
 const sap_cf_destconn_1 = require("sap-cf-destconn");
 const axios_1 = __importDefault(require("axios"));
 const node_cache_1 = __importDefault(require("node-cache"));
@@ -62,7 +62,8 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
                 }
             }
             catch (err) {
-                console.log(err);
+                logAxiosError(err);
+                throw ('sap-cf-axios: Unable to get the XCSRF Token');
             }
         }
         return (yield instanceProm)(req);
@@ -94,3 +95,34 @@ function createInstance(destinationName, instanceConfig) {
         return instance;
     });
 }
+function logAxiosError(error) {
+    if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error(error.response.data);
+        console.error(error.response.status);
+        console.error(error.response.headers);
+    }
+    else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.error(JSON.parse(error.request));
+    }
+    else if (error.message) {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error', error.message);
+    }
+    else {
+        try {
+            console.error(JSON.parse(error));
+        }
+        catch (err) {
+            console.error(error);
+        }
+    }
+    if (error.config) {
+        console.error(error.config);
+    }
+}
+exports.logAxiosError = logAxiosError;
