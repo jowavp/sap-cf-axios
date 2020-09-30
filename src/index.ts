@@ -56,11 +56,17 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
                 }
             } catch (err) {
                 logAxiosError(err);
-                throw('sap-cf-axios: Unable to get the XCSRF Token');
+                throw(`sap-cf-axios: Error while getting token ${tokenReq.method} ${tokenReq.url}`);
             }
             
         }
-        return (await instanceProm)(req)
+        try{
+            return (await instanceProm)(req)
+        } catch (err) {
+            logAxiosError(err);
+            console.error(`sap-cf-axios: Error in request ${req.method} ${req.url}`);
+            throw err;
+        }
     }
 }
 // exports = SapCfAxios;
