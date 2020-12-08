@@ -13,13 +13,15 @@ export default function SapCfAxios(destination: string, instanceConfig?: AxiosRe
             // handle x-csrf-Token
             const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');
             const csrfUrl = typeof xsrfConfig === 'string' ? req.url : xsrfConfig.url;
+            const csrfParams = xsrfConfig.params ? xsrfConfig.params : { };
 
             var tokenReq: AxiosRequestConfig = {
                 url: csrfUrl,
                 method: csrfMethod,
                 headers: {
                     [req.xsrfHeaderName]: "Fetch"
-                }
+                },
+                params: csrfParams
             };
             try{
                 const { headers } = await (await instanceProm)(tokenReq);
