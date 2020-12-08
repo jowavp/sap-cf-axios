@@ -24,12 +24,14 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
             // handle x-csrf-Token
             const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');
             const csrfUrl = typeof xsrfConfig === 'string' ? req.url : xsrfConfig.url;
+            const csrfParams = typeof xsrfConfig === 'string' ? {} : xsrfConfig.params;
             var tokenReq = {
                 url: csrfUrl,
                 method: csrfMethod,
                 headers: {
                     [req.xsrfHeaderName]: "Fetch"
-                }
+                },
+                params: csrfParams
             };
             try {
                 const { headers } = yield (yield instanceProm)(tokenReq);
