@@ -27,6 +27,9 @@ export default function SapCfAxios(destination: string, instanceConfig?: AxiosRe
                 const { headers } = await (await instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
     
+                console.log("GOT COOKIES:");
+                console.log(cookies);
+                console.log(headers);
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
                     if (!req.headers) req.headers = {};

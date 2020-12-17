@@ -36,6 +36,9 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
             try {
                 const { headers } = yield (yield instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
+                console.log("GOT COOKIES:");
+                console.log(cookies);
+                console.log(headers);
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
                     if (!req.headers)
