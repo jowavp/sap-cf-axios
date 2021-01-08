@@ -6,25 +6,30 @@ import enhanceConfig from './configEnhancer';
 
 declare var exports: any;
 
-export default function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
+export default function SapCfAxios(destination: string, instanceConfig?: AxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: object} = 'options') {
     const instanceProm = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
             // handle x-csrf-Token
             const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');
             const csrfUrl = typeof xsrfConfig === 'string' ? req.url : xsrfConfig.url;
+            const csrfParams = typeof xsrfConfig === 'string' ? {} : xsrfConfig.params;
 
             var tokenReq: AxiosRequestConfig = {
                 url: csrfUrl,
                 method: csrfMethod,
                 headers: {
                     [req.xsrfHeaderName]: "Fetch"
-                }
+                },
+                params: csrfParams
             };
             try{
                 const { headers } = await (await instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
     
+                console.log("GOT COOKIES:");
+                console.log(cookies);
+                console.log(headers);
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
                     if (!req.headers) req.headers = {};
