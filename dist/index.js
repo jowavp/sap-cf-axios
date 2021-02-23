@@ -57,8 +57,9 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
                         req.headers = {};
                     if (cookies)
                         req.headers.cookie = cookies.join('; ');
-                    ;
-                    req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
+                    if (headers[req.xsrfHeaderName]) {
+                        req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
+                    }
                 }
             }
             catch (err) {
