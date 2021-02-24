@@ -25,7 +25,11 @@ function getSapCfAxiosInstance(destination, instanceConfig, xsrfConfig = 'option
     }
     const instance = instanceCache.get(cacheKey);
     if (!instance) {
-        throw 'unable to get the destination instance';
+        const cfErr = {
+            message: 'unable to get the destination instance',
+        };
+        throw cfErr;
+        //throw 'unable to get the destination instance';
     }
     return instance;
 }
@@ -64,7 +68,12 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
             }
             catch (err) {
                 logAxiosError(err);
-                throw (`sap-cf-axios: Error while getting token ${tokenReq.method} ${tokenReq.url}`);
+                const cfErr = Object.assign(Object.assign({}, err), { 'sap-cf-axios': {
+                        message: 'sap-cf-axios: Error while getting token',
+                        tokenMethod: tokenReq.method,
+                        tokenUrl: tokenReq.url
+                    } });
+                throw cfErr;
             }
         }
         try {

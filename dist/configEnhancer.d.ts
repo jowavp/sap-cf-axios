@@ -3,7 +3,7 @@ import { IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn
 export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData<IHTTPDestinationConfiguration>): Promise<{
     baseURL: string;
     url?: string | undefined;
-    method?: "link" | "head" | "get" | "GET" | "delete" | "DELETE" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | "LINK" | "unlink" | "UNLINK" | undefined;
+    method?: "link" | "head" | "get" | "GET" | "delete" | "DELETE" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | "purge" | "PURGE" | "LINK" | "unlink" | "UNLINK" | undefined;
     transformRequest?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
     transformResponse?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
     headers?: any;
@@ -21,11 +21,13 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     onUploadProgress?: ((progressEvent: any) => void) | undefined;
     onDownloadProgress?: ((progressEvent: any) => void) | undefined;
     maxContentLength?: number | undefined;
-    validateStatus?: ((status: number) => boolean) | undefined;
+    validateStatus?: ((status: number) => boolean) | null | undefined;
+    maxBodyLength?: number | undefined;
     maxRedirects?: number | undefined;
     socketPath?: string | null | undefined;
     httpAgent?: any;
     httpsAgent?: any;
     proxy?: false | import("axios").AxiosProxyConfig | undefined;
     cancelToken?: import("axios").CancelToken | undefined;
+    decompress?: boolean | undefined;
 }>;
