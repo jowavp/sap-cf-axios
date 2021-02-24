@@ -94,7 +94,7 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
             url: `${dc.tokenServiceURL}`,
             method: 'POST',
             responseType: 'json',
-            data: `client_id=${encodeURIComponent(dc.clientId)}&grant_type=client_credentials`,
+            data: `client_id=${encodeURIComponent(dc.clientId)}&client_secret=${encodeURIComponent(dc.clientSecret)}&grant_type=client_credentials`,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             auth: {
                 username: dc.clientId,
