@@ -13,7 +13,7 @@ export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
 
 export {AxiosResponse, AxiosRequestConfig} from 'axios';
 
-export function getSapCfAxiosInstance (destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
+export function getSapCfAxiosInstance (destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: string} = 'options') {
     const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
     if(!instanceCache.has(cacheKey)){
       instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
@@ -34,25 +34,30 @@ export function getSapCfAxiosInstance (destination: string, instanceConfig?: Sap
       return instanceCache.flushAll();
   }
 
-export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string} = 'options') {
+export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: string} = 'options') {
     const instanceProm = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
             // handle x-csrf-Token
             const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');
             const csrfUrl = typeof xsrfConfig === 'string' ? req.url : xsrfConfig.url;
+            const csrfParams = typeof xsrfConfig === 'string' ? {} : xsrfConfig.params;
 
             var tokenReq: AxiosRequestConfig = {
                 url: csrfUrl,
                 method: csrfMethod,
                 headers: {
                     [req.xsrfHeaderName]: "Fetch"
-                }
+                },
+                params: csrfParams
             };
             try{
                 const { headers } = await (await instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
     
+                console.log("GOT COOKIES:");
+                console.log(cookies);
+                console.log(headers);
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
                     if (!req.headers) req.headers = {};
