@@ -13,7 +13,7 @@ export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
 
 export {AxiosResponse, AxiosRequestConfig} from 'axios';
 
-export function getSapCfAxiosInstance (destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: string} = 'options') {
+export function getSapCfAxiosInstance (destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: object} = 'options') {
     const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
     if(!instanceCache.has(cacheKey)){
       instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
@@ -34,7 +34,7 @@ export function getSapCfAxiosInstance (destination: string, instanceConfig?: Sap
       return instanceCache.flushAll();
   }
 
-export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: string} = 'options') {
+export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | {method: Method, url: string, params: object} = 'options') {
     const instanceProm = createInstance(destination, instanceConfig);
     return async<T>(req: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
         if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
