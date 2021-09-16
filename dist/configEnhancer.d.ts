@@ -3,7 +3,7 @@ import { IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn
 export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData<IHTTPDestinationConfiguration>): Promise<{
     baseURL: string;
     url?: string | undefined;
-    method?: "link" | "head" | "get" | "GET" | "delete" | "DELETE" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | "purge" | "PURGE" | "LINK" | "unlink" | "UNLINK" | undefined;
+    method?: import("axios").Method | undefined;
     transformRequest?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
     transformResponse?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
     headers?: any;
@@ -15,7 +15,7 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     withCredentials?: boolean | undefined;
     adapter?: import("axios").AxiosAdapter | undefined;
     auth?: import("axios").AxiosBasicCredentials | undefined;
-    responseType?: "text" | "document" | "arraybuffer" | "blob" | "json" | "stream" | undefined;
+    responseType?: import("axios").ResponseType | undefined;
     xsrfCookieName?: string | undefined;
     xsrfHeaderName?: string | undefined;
     onUploadProgress?: ((progressEvent: any) => void) | undefined;

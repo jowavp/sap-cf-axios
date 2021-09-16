@@ -28,6 +28,8 @@ function enhanceConfig(config, destination) {
             if (destination.authTokens[0].error) {
                 throw (new Error(destination.authTokens[0].error));
             }
+            if (destination.authTokens[0].type && destination.authTokens[0].type.toLocaleLowerCase() === "bearertoken")
+                destination.authTokens[0].type = 'Bearer';
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
             delete config.headers.authorization;
         }
