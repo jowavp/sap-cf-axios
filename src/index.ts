@@ -55,9 +55,6 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
                 const { headers } = await (await instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
     
-                console.log("GOT COOKIES:");
-                console.log(cookies);
-                console.log(headers);
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
                     if (!req.headers) req.headers = {};
@@ -68,15 +65,17 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
                 }
             } catch (err) {
                 logAxiosError(err);
-                const cfErr = {
-                    ...err,
-                    'sap-cf-axios': {
-                        message: 'sap-cf-axios: Error while getting token',
-                        tokenMethod: tokenReq.method,
-                        tokenUrl: tokenReq.url
+                if (err instanceof Error) {
+                    throw {
+                        ...err,
+                        'sap-cf-axios': {
+                            message: 'sap-cf-axios: Error while getting token',
+                            tokenMethod: tokenReq.method,
+                            tokenUrl: tokenReq.url
+                        }
                     }
                 }
-                throw cfErr;
+                throw err;                
             }
             
         }

@@ -37,8 +37,8 @@ function enhanceConfig(config, destination) {
             // connect over the cloud connector
             const authHeader = config.headers['Authorization'] || config.headers['authorization'];
             const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
-                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
+                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId, authHeader) :
+                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...
             // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 
@@ -54,22 +54,26 @@ exports.default = enhanceConfig;
 function createToken(dc) {
     return __awaiter(this, void 0, void 0, function* () {
         const scope = convertScope(dc.Scope || dc.scope);
-        const audience = dc.oauth_audience;
+        const additionalOauthProperties = Object.entries(dc)
+            .filter(([key]) => key.startsWith(`oauth_`))
+            .reduce((acc, [key, value]) => {
+            const newKey = key.replace(`oauth_`, '');
+            if (newKey) {
+                acc = Object.assign(Object.assign({}, acc), { [newKey]: value });
+            }
+            return acc;
+        }, undefined);
         let token;
         const cacheKey = `${dc.Name}_${dc.tokenServiceURL}`;
         if (tokenCache[cacheKey] && tokenCache[cacheKey].expires.getTime() > new Date().getTime()) {
             return tokenCache[cacheKey].value;
         }
-        if (scope || audience) {
-            token = (yield axios_1.default({
+        if (scope || additionalOauthProperties) {
+            token = (yield (0, axios_1.default)({
                 url: `${dc.tokenServiceURL}`,
                 method: 'POST',
                 responseType: 'json',
-                data: {
-                    "grant_type": "client_credentials",
-                    scope,
-                    audience
-                },
+                data: Object.assign(Object.assign({ "grant_type": "client_credentials" }, additionalOauthProperties), scope),
                 headers: { 'Content-Type': 'application/json' },
                 auth: {
                     username: dc.clientId,
@@ -78,7 +82,7 @@ function createToken(dc) {
             })).data;
         }
         else {
-            token = (yield axios_1.default({
+            token = (yield (0, axios_1.default)({
                 url: `${dc.tokenServiceURL}`,
                 method: 'POST',
                 responseType: 'json',
@@ -102,7 +106,7 @@ function createToken(dc) {
 ;
 function convertScope(scope) {
     if (!scope)
-        return null;
+        return undefined;
     return scope.split(" ").map((sc) => sc.split(':')).reduce((acc, [key, value]) => {
         acc[key] = value;
         return acc;

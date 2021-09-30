@@ -57,9 +57,6 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
             try {
                 const { headers } = yield (yield instanceProm)(tokenReq);
                 const cookies = headers["set-cookie"]; // get cookie from request
-                console.log("GOT COOKIES:");
-                console.log(cookies);
-                console.log(headers);
                 // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
                 if (headers) {
                     if (!req.headers)
@@ -73,12 +70,14 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
             }
             catch (err) {
                 logAxiosError(err);
-                const cfErr = Object.assign(Object.assign({}, err), { 'sap-cf-axios': {
-                        message: 'sap-cf-axios: Error while getting token',
-                        tokenMethod: tokenReq.method,
-                        tokenUrl: tokenReq.url
-                    } });
-                throw cfErr;
+                if (err instanceof Error) {
+                    throw Object.assign(Object.assign({}, err), { 'sap-cf-axios': {
+                            message: 'sap-cf-axios: Error while getting token',
+                            tokenMethod: tokenReq.method,
+                            tokenUrl: tokenReq.url
+                        } });
+                }
+                throw err;
             }
         }
         try {
@@ -106,8 +105,8 @@ function createInstance(destinationName, instanceConfig) {
             // enhance config object with destination information
             const auth = config.headers.Authorization || config.headers.authorization;
             try {
-                const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
-                return yield configEnhancer_1.default(config, destination);
+                const destination = yield (0, sap_cf_destconn_1.readDestination)(destinationName, auth, (instanceConfig || {}).subscribedDomain);
+                return yield (0, configEnhancer_1.default)(config, destination);
             }
             catch (e) {
                 console.error('unable to connect to the destination', e);

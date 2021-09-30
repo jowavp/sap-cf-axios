@@ -11,15 +11,6 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
     // add auth header
     const destinationConfiguration = destination.destinationConfiguration;
 
-    if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
-        const clientCredentialsToken = await createToken(destinationConfiguration);
-        config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${clientCredentialsToken}`
-        }
-        delete config.headers.authorization;
-    }
-
     if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error) {
         if (destination.authTokens[0].error) {
             throw (new Error(destination.authTokens[0].error));
@@ -31,6 +22,13 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
         config.headers = {
             ...config.headers,
             Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`
+        }
+        delete config.headers.authorization;
+    } else if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
+        const clientCredentialsToken = await createToken(destinationConfiguration);
+        config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${clientCredentialsToken}`
         }
         delete config.headers.authorization;
     }
@@ -69,7 +67,20 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
 async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     const scope = convertScope(dc.Scope || dc.scope);
-    const audience = dc.oauth_audience;
+    
+    const additionalOauthProperties = Object.entries(dc)
+        .filter(([key]) => key.startsWith(`oauth_`))
+        .reduce<{[key: string]: string} | undefined>(
+            (acc, [key, value]) => {
+                const newKey = key.replace(`oauth_`, '');
+                if (newKey) {
+                    acc = { ...acc, [newKey] :value };
+                }
+                return acc;
+            },
+            undefined
+        );
+
     let token;
 
     const cacheKey = `${dc.Name}_${dc.tokenServiceURL}`;
@@ -77,15 +88,15 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
         return tokenCache[cacheKey].value;
     }
 
-    if(scope || audience){
+    if(scope || additionalOauthProperties){
         token = (await axios({
             url: `${dc.tokenServiceURL}`,
             method: 'POST',
             responseType: 'json',
             data: {
                 "grant_type": "client_credentials",
-                scope,
-                audience
+                ...additionalOauthProperties,
+                ...scope
             },
             headers: { 'Content-Type': 'application/json' },
             auth: {
@@ -120,7 +131,7 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
 };
 
 function convertScope (scope?: String) {
-    if(!scope) return null;
+    if(!scope) return undefined;
     return scope.split(" ").map<string[]>(
         (sc) => sc.split(':')
     ).reduce<{[key: string]: string}>(

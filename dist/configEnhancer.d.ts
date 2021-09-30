@@ -30,4 +30,5 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     proxy?: false | import("axios").AxiosProxyConfig | undefined;
     cancelToken?: import("axios").CancelToken | undefined;
     decompress?: boolean | undefined;
+    transitional?: import("axios").TransitionalOptions | undefined;
 }>;
