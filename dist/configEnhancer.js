@@ -19,11 +19,6 @@ function enhanceConfig(config, destination) {
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
         const destinationConfiguration = destination.destinationConfiguration;
-        if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
-            const clientCredentialsToken = yield createToken(destinationConfiguration);
-            config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });
-            delete config.headers.authorization;
-        }
         if (destination.authTokens && destination.authTokens[0] && !destination.authTokens[0].error) {
             if (destination.authTokens[0].error) {
                 throw (new Error(destination.authTokens[0].error));
@@ -31,6 +26,15 @@ function enhanceConfig(config, destination) {
             if (destination.authTokens[0].type && destination.authTokens[0].type.toLocaleLowerCase() === "bearertoken")
                 destination.authTokens[0].type = 'Bearer';
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
+            delete config.headers.authorization;
+        }
+        else if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
+            if (destination.authTokens && destination.authTokens[0] && destination.authTokens[0].error) {
+                console.warn(destination.authTokens[0].error);
+                console.warn(`Token cannot be delivered by the destination service. I will try to do it myself by adding some parameters.`);
+            }
+            const clientCredentialsToken = yield createToken(destinationConfiguration);
+            config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` });
             delete config.headers.authorization;
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
@@ -73,7 +77,7 @@ function createToken(dc) {
                 url: `${dc.tokenServiceURL}`,
                 method: 'POST',
                 responseType: 'json',
-                data: Object.assign(Object.assign({ "grant_type": "client_credentials" }, additionalOauthProperties), scope),
+                data: Object.assign(Object.assign({ "grant_type": "client_credentials" }, additionalOauthProperties), { scope: scope }),
                 headers: { 'Content-Type': 'application/json' },
                 auth: {
                     username: dc.clientId,
