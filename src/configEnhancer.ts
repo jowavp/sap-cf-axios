@@ -102,7 +102,7 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
             data: {
                 "grant_type": "client_credentials",
                 ...additionalOauthProperties,
-                ...scope
+                scope: scope
             },
             headers: { 'Content-Type': 'application/json' },
             auth: {
