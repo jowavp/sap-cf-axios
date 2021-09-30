@@ -25,6 +25,12 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
         }
         delete config.headers.authorization;
     } else if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
+        
+        if (destination.authTokens && destination.authTokens[0] && destination.authTokens[0].error) {
+            console.warn(destination.authTokens[0].error);
+            console.warn(`Token cannot be delivered by the destination service. I will try to do it myself by adding some parameters.`);
+        }
+
         const clientCredentialsToken = await createToken(destinationConfiguration);
         config.headers = {
             ...config.headers,
