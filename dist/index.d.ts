@@ -7,11 +7,11 @@ export declare function getSapCfAxiosInstance(destination: string, instanceConfi
     method: Method;
     url: string;
     params: object;
-}): <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+}): <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T, any>>;
 export declare function flushCache(): void;
 export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig?: Method | {
     method: Method;
     url: string;
     params: object;
-}): <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
+}): <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T, any>>;
 export declare function logAxiosError(error: any): void;

@@ -16,6 +16,7 @@ const axios_1 = __importDefault(require("axios"));
 const sap_cf_destconn_1 = require("sap-cf-destconn");
 const tokenCache = {};
 function enhanceConfig(config, destination) {
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // add auth header
         const destinationConfiguration = destination.destinationConfiguration;
@@ -24,6 +25,9 @@ function enhanceConfig(config, destination) {
                 throw (new Error(destination.authTokens[0].error));
             }
             if (destination.authTokens[0].type && destination.authTokens[0].type.toLocaleLowerCase() === "bearertoken")
+                destination.authTokens[0].type = 'Bearer';
+            if (destination.authTokens[0].type && destination.authTokens[0].type.toLowerCase() === 'bearer')
+                // some applications fail on bearer
                 destination.authTokens[0].type = 'Bearer';
             config.headers = Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` });
             delete config.headers.authorization;
@@ -39,16 +43,16 @@ function enhanceConfig(config, destination) {
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
-            const authHeader = config.headers['Authorization'] || config.headers['authorization'];
+            const authHeader = ((_a = config.headers) === null || _a === void 0 ? void 0 : _a['Authorization']) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b['authorization']);
             const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId, authHeader) :
-                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId);
+                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
+                yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...
             // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 
             if (destinationConfiguration.Authentication === "PrincipalPropagation") {
-                delete config.headers.Authorization;
-                delete config.headers.authorization;
+                (_c = config.headers) === null || _c === void 0 ? true : delete _c.Authorization;
+                (_d = config.headers) === null || _d === void 0 ? true : delete _d.authorization;
             }
         }
         return Object.assign(Object.assign({}, config), { baseURL: destinationConfiguration.URL });
@@ -73,7 +77,7 @@ function createToken(dc) {
             return tokenCache[cacheKey].value;
         }
         if (scope || additionalOauthProperties) {
-            token = (yield (0, axios_1.default)({
+            token = (yield axios_1.default({
                 url: `${dc.tokenServiceURL}`,
                 method: 'POST',
                 responseType: 'json',
@@ -86,7 +90,7 @@ function createToken(dc) {
             })).data;
         }
         else {
-            token = (yield (0, axios_1.default)({
+            token = (yield axios_1.default({
                 url: `${dc.tokenServiceURL}`,
                 method: 'POST',
                 responseType: 'json',

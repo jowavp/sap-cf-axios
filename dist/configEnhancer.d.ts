@@ -4,9 +4,9 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     baseURL: string;
     url?: string | undefined;
     method?: import("axios").Method | undefined;
-    transformRequest?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
-    transformResponse?: import("axios").AxiosTransformer | import("axios").AxiosTransformer[] | undefined;
-    headers?: any;
+    transformRequest?: import("axios").AxiosRequestTransformer | import("axios").AxiosRequestTransformer[] | undefined;
+    transformResponse?: import("axios").AxiosResponseTransformer | import("axios").AxiosResponseTransformer[] | undefined;
+    headers?: import("axios").AxiosRequestHeaders | undefined;
     params?: any;
     paramsSerializer?: ((params: any) => string) | undefined;
     data?: any;
@@ -31,4 +31,6 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     cancelToken?: import("axios").CancelToken | undefined;
     decompress?: boolean | undefined;
     transitional?: import("axios").TransitionalOptions | undefined;
+    signal?: AbortSignal | undefined;
+    insecureHTTPParser?: boolean | undefined;
 }>;

@@ -1,5 +1,5 @@
 import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, { AxiosPromise, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import NodeCache from 'node-cache';
 
 import enhanceConfig from './configEnhancer';
@@ -80,7 +80,7 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
             
         }
         try{
-            return (await instanceProm)(req)
+            return (await instanceProm)(req) as Promise<AxiosResponse<T>>
         } catch (err) {
             logAxiosError(err);
             console.error(`sap-cf-axios: Error in request ${req.method} ${req.url}`);
@@ -104,7 +104,7 @@ async function createInstance(destinationName: string, instanceConfig?: SapCFAxi
     instance.interceptors.request.use(
         async (config) => {
             // enhance config object with destination information
-            const auth = config.headers.Authorization || config.headers.authorization;
+            const auth = config.headers?.Authorization || config.headers?.authorization;
             try{
                 const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth, (instanceConfig || {}).subscribedDomain);
                 return await enhanceConfig(config, destination);

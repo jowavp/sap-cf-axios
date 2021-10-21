@@ -102,11 +102,12 @@ function createInstance(destinationName, instanceConfig) {
         // instance.defaults.withCredentials = true;
         // we return the destination configuration in the response.
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             // enhance config object with destination information
-            const auth = config.headers.Authorization || config.headers.authorization;
+            const auth = ((_a = config.headers) === null || _a === void 0 ? void 0 : _a.Authorization) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b.authorization);
             try {
-                const destination = yield (0, sap_cf_destconn_1.readDestination)(destinationName, auth, (instanceConfig || {}).subscribedDomain);
-                return yield (0, configEnhancer_1.default)(config, destination);
+                const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
+                return yield configEnhancer_1.default(config, destination);
             }
             catch (e) {
                 console.error('unable to connect to the destination', e);
