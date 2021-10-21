@@ -1,6 +1,6 @@
 {
   "name": "sap-cf-axios",
-  "version": "0.2.33",
+  "version": "0.2.34",
   "description": "Wrap axios to use the SAP Cloud Foundry destination Service",
   "main": "dist/index.js",
   "files": [

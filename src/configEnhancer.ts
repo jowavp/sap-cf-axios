@@ -18,6 +18,10 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
         if (destination.authTokens[0].type && destination.authTokens[0].type.toLocaleLowerCase() === "bearertoken")
             destination.authTokens[0].type = 'Bearer';
+        
+        if (destination.authTokens[0].type && destination.authTokens[0].type.toLowerCase() === 'bearer') 
+            // some applications fail on bearer
+            destination.authTokens[0].type = 'Bearer';
 
         config.headers = {
             ...config.headers,
@@ -41,7 +45,7 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
     if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
         // connect over the cloud connector
-        const authHeader = config.headers['Authorization'] || config.headers['authorization'];
+        const authHeader = config.headers?.['Authorization'] || config.headers?.['authorization'];
         const connectivityValues =
             destinationConfiguration.Authentication === "PrincipalPropagation" ?
                 await readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
@@ -60,8 +64,8 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
         // if it is principal propagation ... remove the original authentication header ...
         // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 
         if (destinationConfiguration.Authentication === "PrincipalPropagation") {
-            delete config.headers.Authorization;
-            delete config.headers.authorization;
+            delete config.headers?.Authorization;
+            delete config.headers?.authorization;
         }
     }
 
