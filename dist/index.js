@@ -104,7 +104,7 @@ function createInstance(destinationName, instanceConfig) {
         instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             // enhance config object with destination information
-            const auth = ((_a = config.headers) === null || _a === void 0 ? void 0 : _a.Authorization) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b.authorization);
+            const auth = (((_a = config.headers) === null || _a === void 0 ? void 0 : _a.Authorization) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b.authorization));
             try {
                 const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
                 return yield configEnhancer_1.default(config, destination);

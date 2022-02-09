@@ -16,6 +16,7 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     adapter?: import("axios").AxiosAdapter | undefined;
     auth?: import("axios").AxiosBasicCredentials | undefined;
     responseType?: import("axios").ResponseType | undefined;
+    responseEncoding?: string | undefined;
     xsrfCookieName?: string | undefined;
     xsrfHeaderName?: string | undefined;
     onUploadProgress?: ((progressEvent: any) => void) | undefined;

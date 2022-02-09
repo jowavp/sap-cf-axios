@@ -104,7 +104,7 @@ async function createInstance(destinationName: string, instanceConfig?: SapCFAxi
     instance.interceptors.request.use(
         async (config) => {
             // enhance config object with destination information
-            const auth = config.headers?.Authorization || config.headers?.authorization;
+            const auth = <string | undefined>(config.headers?.Authorization || config.headers?.authorization);
             try{
                 const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth, (instanceConfig || {}).subscribedDomain);
                 return await enhanceConfig(config, destination);

@@ -2,7 +2,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { readConnectivity, IDestinationConfiguration, IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn';
 
-const tokenCache: {[key: string]: {value: string, expires: Date}} = {
+const tokenCache: { [key: string]: { value: string, expires: Date } } = {
 
 }
 
@@ -18,8 +18,8 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
         if (destination.authTokens[0].type && destination.authTokens[0].type.toLocaleLowerCase() === "bearertoken")
             destination.authTokens[0].type = 'Bearer';
-        
-        if (destination.authTokens[0].type && destination.authTokens[0].type.toLowerCase() === 'bearer') 
+
+        if (destination.authTokens[0].type && destination.authTokens[0].type.toLowerCase() === 'bearer')
             // some applications fail on bearer
             destination.authTokens[0].type = 'Bearer';
 
@@ -29,7 +29,7 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
         }
         delete config.headers.authorization;
     } else if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
-        
+
         if (destination.authTokens && destination.authTokens[0] && destination.authTokens[0].error) {
             console.warn(destination.authTokens[0].error);
             console.warn(`Token cannot be delivered by the destination service. I will try to do it myself by adding some parameters.`);
@@ -45,7 +45,7 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
     if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
         // connect over the cloud connector
-        const authHeader = config.headers?.['Authorization'] || config.headers?.['authorization'];
+        const authHeader = <string | undefined>(config.headers?.['Authorization'] || config.headers?.['authorization']);
         const connectivityValues =
             destinationConfiguration.Authentication === "PrincipalPropagation" ?
                 await readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
@@ -77,14 +77,14 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
 
 async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     const scope = convertScope(dc.Scope || dc.scope);
-    
+
     const additionalOauthProperties = Object.entries(dc)
         .filter(([key]) => key.startsWith(`oauth_`))
-        .reduce<{[key: string]: string} | undefined>(
+        .reduce<{ [key: string]: string } | undefined>(
             (acc, [key, value]) => {
                 const newKey = key.replace(`oauth_`, '');
                 if (newKey) {
-                    acc = { ...acc, [newKey] :value };
+                    acc = { ...acc, [newKey]: value };
                 }
                 return acc;
             },
@@ -94,11 +94,11 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     let token;
 
     const cacheKey = `${dc.Name}_${dc.tokenServiceURL}`;
-    if( tokenCache[cacheKey] && tokenCache[cacheKey].expires.getTime() > new Date().getTime() ){
+    if (tokenCache[cacheKey] && tokenCache[cacheKey].expires.getTime() > new Date().getTime()) {
         return tokenCache[cacheKey].value;
     }
 
-    if(scope || additionalOauthProperties){
+    if (scope || additionalOauthProperties) {
         token = (await axios({
             url: `${dc.tokenServiceURL}`,
             method: 'POST',
@@ -129,8 +129,8 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     }
 
     // cache the token
-    const timeObject = new Date(); 
-    
+    const timeObject = new Date();
+
 
     tokenCache[cacheKey] = {
         value: token.access_token,
@@ -140,11 +140,11 @@ async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
     return token.access_token;
 };
 
-function convertScope (scope?: String) {
-    if(!scope) return undefined;
+function convertScope(scope?: String) {
+    if (!scope) return undefined;
     return scope.split(" ").map<string[]>(
         (sc) => sc.split(':')
-    ).reduce<{[key: string]: string}>(
+    ).reduce<{ [key: string]: string }>(
         (acc, [key, value]) => {
             acc[key] = value;
             return acc;

@@ -43,7 +43,7 @@ function enhanceConfig(config, destination) {
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector
-            const authHeader = ((_a = config.headers) === null || _a === void 0 ? void 0 : _a['Authorization']) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b['authorization']);
+            const authHeader = (((_a = config.headers) === null || _a === void 0 ? void 0 : _a['Authorization']) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b['authorization']));
             const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
                 yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
                 yield sap_cf_destconn_1.readConnectivity(destinationConfiguration.CloudConnectorLocationId);
