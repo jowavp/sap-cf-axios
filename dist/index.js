@@ -39,83 +39,68 @@ function flushCache() {
 }
 exports.flushCache = flushCache;
 function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
-    const instanceProm = createInstance(destination, instanceConfig);
-    return (req) => __awaiter(this, void 0, void 0, function* () {
-        if (req.xsrfHeaderName && req.xsrfHeaderName !== 'X-XSRF-TOKEN') {
-            // handle x-csrf-Token
-            const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');
-            const csrfUrl = typeof xsrfConfig === 'string' ? req.url : xsrfConfig.url;
-            const csrfParams = typeof xsrfConfig === 'string' ? {} : xsrfConfig.params;
-            var tokenReq = {
-                url: csrfUrl,
-                method: csrfMethod,
-                headers: {
-                    [req.xsrfHeaderName]: "Fetch"
-                },
-                params: csrfParams
-            };
-            try {
-                const { headers } = yield (yield instanceProm)(tokenReq);
-                const cookies = headers["set-cookie"]; // get cookie from request
-                // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
-                if (headers) {
-                    if (!req.headers)
-                        req.headers = {};
-                    if (cookies)
-                        req.headers.cookie = cookies.join('; ');
-                    if (headers[req.xsrfHeaderName]) {
-                        req.headers[req.xsrfHeaderName] = headers[req.xsrfHeaderName];
-                    }
-                }
-            }
-            catch (err) {
-                logAxiosError(err);
-                if (err instanceof Error) {
-                    throw Object.assign(Object.assign({}, err), { 'sap-cf-axios': {
-                            message: 'sap-cf-axios: Error while getting token',
-                            tokenMethod: tokenReq.method,
-                            tokenUrl: tokenReq.url
-                        } });
-                }
-                throw err;
-            }
-        }
-        try {
-            return (yield instanceProm)(req);
-        }
-        catch (err) {
-            logAxiosError(err);
-            console.error(`sap-cf-axios: Error in request ${req.method} ${req.url}`);
-            throw err;
-        }
-    });
+    return createInstance(destination, instanceConfig, xsrfConfig);
 }
 exports.default = SapCfAxios;
 // exports = SapCfAxios;
-function createInstance(destinationName, instanceConfig) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // we will add an interceptor to axios that will take care of the destination configuration
-        const instance = axios_1.default.create(instanceConfig);
-        // set cookiesupport to enable X-CSRF-Token requests
-        // axiosCookieJarSupport(instance);
-        // instance.defaults.jar = new tough.CookieJar();
-        // instance.defaults.withCredentials = true;
-        // we return the destination configuration in the response.
-        instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
-            // enhance config object with destination information
-            const auth = (((_a = config.headers) === null || _a === void 0 ? void 0 : _a.Authorization) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b.authorization));
-            try {
-                const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
-                return yield configEnhancer_1.default(config, destination);
+function createInstance(destinationName, instanceConfig, xsrfConfig = 'options') {
+    // we will add an interceptor to axios that will take care of the destination configuration
+    const instance = axios_1.default.create(instanceConfig);
+    // we return the destination configuration in the response.
+    instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c;
+        // enhance config object with destination information
+        const auth = (((_a = config.headers) === null || _a === void 0 ? void 0 : _a.Authorization) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b.authorization));
+        try {
+            const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
+            const newConfig = yield configEnhancer_1.default(config, destination);
+            if (newConfig.xsrfHeaderName && newConfig.xsrfHeaderName !== 'X-XSRF-TOKEN' && ((_c = newConfig.headers) === null || _c === void 0 ? void 0 : _c[newConfig.xsrfHeaderName]) !== 'Fetch') {
+                // handle x-csrf-Token
+                const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');
+                const csrfUrl = typeof xsrfConfig === 'string' ? newConfig.url : xsrfConfig.url;
+                const csrfParams = typeof xsrfConfig === 'string' ? {} : xsrfConfig.params;
+                var tokenReq = {
+                    url: csrfUrl,
+                    method: csrfMethod,
+                    headers: {
+                        [newConfig.xsrfHeaderName]: "Fetch"
+                    },
+                    params: csrfParams
+                };
+                try {
+                    const { headers } = yield instance(tokenReq);
+                    const cookies = headers["set-cookie"]; // get cookie from request
+                    // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
+                    if (headers) {
+                        if (!newConfig.headers)
+                            newConfig.headers = {};
+                        if (cookies)
+                            newConfig.headers.cookie = cookies.join('; ');
+                        if (headers[newConfig.xsrfHeaderName]) {
+                            newConfig.headers[newConfig.xsrfHeaderName] = headers[newConfig.xsrfHeaderName];
+                        }
+                    }
+                }
+                catch (err) {
+                    logAxiosError(err);
+                    if (err instanceof Error) {
+                        throw Object.assign(Object.assign({}, err), { 'sap-cf-axios': {
+                                message: 'sap-cf-axios: Error while getting token',
+                                tokenMethod: tokenReq.method,
+                                tokenUrl: tokenReq.url
+                            } });
+                    }
+                    throw err;
+                }
             }
-            catch (e) {
-                console.error('unable to connect to the destination', e);
-                throw e;
-            }
-        }));
-        return instance;
-    });
+            return newConfig;
+        }
+        catch (e) {
+            console.error('unable to connect to the destination', e);
+            throw e;
+        }
+    }));
+    return instance;
 }
 function logAxiosError(error) {
     if (error.response) {
