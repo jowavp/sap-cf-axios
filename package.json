@@ -23,7 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "@sap/xsenv": "^3.2.1",
-    "axios": "^0.26.1",
+    "axios": "^0.21.2",
     "node-cache": "^5.1.2",
     "sap-cf-destconn": "^0.0.32"
   },
