@@ -12,12 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logAxiosError = exports.flushCache = exports.getSapCfAxiosInstance = void 0;
+exports.logAxiosError = exports.flushCache = exports.getSapCfAxiosInstance = exports.AxiosError = void 0;
 const sap_cf_destconn_1 = require("sap-cf-destconn");
 const axios_1 = __importDefault(require("axios"));
 const node_cache_1 = __importDefault(require("node-cache"));
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
 const instanceCache = new node_cache_1.default({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
+var axios_2 = require("axios");
+Object.defineProperty(exports, "AxiosError", { enumerable: true, get: function () { return axios_2.AxiosError; } });
 function getSapCfAxiosInstance(destination, instanceConfig, xsrfConfig = 'options') {
     const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
     if (!instanceCache.has(cacheKey)) {
@@ -52,8 +54,8 @@ function createInstance(destinationName, instanceConfig, xsrfConfig = 'options')
         // enhance config object with destination information
         const auth = (((_a = config.headers) === null || _a === void 0 ? void 0 : _a.Authorization) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b.authorization));
         try {
-            const destination = yield sap_cf_destconn_1.readDestination(destinationName, auth, (instanceConfig || {}).subscribedDomain);
-            const newConfig = yield configEnhancer_1.default(config, destination);
+            const destination = yield (0, sap_cf_destconn_1.readDestination)(destinationName, auth, (instanceConfig || {}).subscribedDomain);
+            const newConfig = yield (0, configEnhancer_1.default)(config, destination);
             if (newConfig.xsrfHeaderName && newConfig.xsrfHeaderName !== 'X-XSRF-TOKEN' && ((_c = newConfig.headers) === null || _c === void 0 ? void 0 : _c[newConfig.xsrfHeaderName]) !== 'Fetch') {
                 // handle x-csrf-Token
                 const csrfMethod = typeof xsrfConfig === 'string' ? xsrfConfig : (xsrfConfig.method || 'options');

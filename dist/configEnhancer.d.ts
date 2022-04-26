@@ -3,7 +3,7 @@ import { IDestinationData, IHTTPDestinationConfiguration } from 'sap-cf-destconn
 export default function enhanceConfig(config: AxiosRequestConfig, destination: IDestinationData<IHTTPDestinationConfiguration>): Promise<{
     baseURL: string;
     url?: string | undefined;
-    method?: import("axios").Method | undefined;
+    method?: string | undefined;
     transformRequest?: import("axios").AxiosRequestTransformer | import("axios").AxiosRequestTransformer[] | undefined;
     transformResponse?: import("axios").AxiosResponseTransformer | import("axios").AxiosResponseTransformer[] | undefined;
     headers?: import("axios").AxiosRequestHeaders | undefined;
@@ -25,6 +25,9 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     validateStatus?: ((status: number) => boolean) | null | undefined;
     maxBodyLength?: number | undefined;
     maxRedirects?: number | undefined;
+    beforeRedirect?: ((options: Record<string, any>, responseDetails: {
+        headers: Record<string, string>;
+    }) => void) | undefined;
     socketPath?: string | null | undefined;
     httpAgent?: any;
     httpsAgent?: any;
@@ -34,4 +37,7 @@ export default function enhanceConfig(config: AxiosRequestConfig, destination: I
     transitional?: import("axios").TransitionalOptions | undefined;
     signal?: AbortSignal | undefined;
     insecureHTTPParser?: boolean | undefined;
+    env?: {
+        FormData?: (new (...args: any[]) => object) | undefined;
+    } | undefined;
 }>;
