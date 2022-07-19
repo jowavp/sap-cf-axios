@@ -1,6 +1,7 @@
 import { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
     subscribedDomain?: string;
+    logger?: any;
 }
 export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 export declare function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig?: Method | {
@@ -14,4 +15,4 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
     url: string;
     params: object;
 }): AxiosInstance;
-export declare function logAxiosError(error: any): void;
+export declare function logAxiosError(error: any, logger1: any): void;

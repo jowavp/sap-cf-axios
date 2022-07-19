@@ -1,14 +1,17 @@
 import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
 import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import NodeCache from 'node-cache';
+import * as log from 'cf-nodejs-logging-support';
 
 import enhanceConfig from './configEnhancer';
+import { isFunction } from 'util';
 
 declare var exports: any;
 const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
 
 export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
     subscribedDomain?: string;
+    logger?: any;
 }
 
 export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
@@ -48,6 +51,9 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
     instance.interceptors.request.use(
         async (config) => {
             // enhance config object with destination information
+            //@ts-ignore
+            const logger: ILogger = config.logger || log || console;
+
             const auth = <string | undefined>(config.headers?.Authorization || config.headers?.authorization);
             try {
                 const destination = await readDestination<IHTTPDestinationConfiguration>(destinationName, auth, (instanceConfig || {}).subscribedDomain);
@@ -80,7 +86,7 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
                             }
                         }
                     } catch (err) {
-                        logAxiosError(err);
+                        logAxiosError(err, logger);
                         if (err instanceof Error) {
                             throw {
                                 ...err,
@@ -98,7 +104,15 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
 
                 return newConfig;
             } catch (e) {
-                console.error('unable to connect to the destination', e)
+                if (e instanceof Error) {
+                    logger.error('unable to connect to the destination', e)
+                    throw {
+                        ...e,
+                        'sap-cf-axios': {
+                            message: 'sap-cf-axios: unable to connect to the destination'
+                        }
+                    }
+                }
                 throw e;
             }
         }
@@ -108,29 +122,36 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
 
 }
 
-export function logAxiosError(error) {
-    if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error(error.response.data);
-        console.error(error.response.status);
-        console.error(error.response.headers);
-    } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.error(JSON.parse(error.request));
-    } else if (error.message) {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error', error.message);
-    } else {
-        try {
-            console.error(JSON.parse(error));
-        } catch (err) {
-            console.error(error);
+export function logAxiosError(error, logger1: any) {
+    const logger = typeof logger1?.error === "function" ? logger1 : log;
+    try {
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            logger.error(error.response.data);
+            logger.error(error.response.status);
+            logger.error(error.response.headers);
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+            // http.ClientRequest in node.js
+            logger.error(JSON.stringify(error.request));
+        } else if (error.message) {
+            // Something happened in setting up the request that triggered an Error
+            logger.error('Error', error.message);
+        } else {
+            try {
+                logger.error(JSON.stringify(error));
+            } catch (err) {
+                logger.error(error);
+            }
         }
+        if (error.config) {
+            logger.error(JSON.stringify(error.config));
+        }
+    } catch (error) {
+        console.error('Cannot log errors with the given logger');
+        console.error(JSON.stringify(error));
     }
-    if (error.config) {
-        console.error(error.config);
-    }
+
 }
