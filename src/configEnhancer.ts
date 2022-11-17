@@ -72,7 +72,7 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
     return {
         ...config,
         baseURL: destinationConfiguration.URL
-    }
+    } as AxiosRequestConfig
 }
 
 async function createToken(dc: IHTTPDestinationConfiguration): Promise<string> {
