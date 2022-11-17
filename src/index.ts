@@ -69,6 +69,7 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
                         url: csrfUrl,
                         method: csrfMethod,
                         headers: {
+                            ...(auth) && {authorization: auth},
                             [newConfig.xsrfHeaderName]: "Fetch"
                         },
                         params: csrfParams
