@@ -1,13 +1,11 @@
 import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import NodeCache from 'node-cache';
 import * as log from 'cf-nodejs-logging-support';
-
 import enhanceConfig from './configEnhancer';
-import objectHash from 'object-hash';
 
 declare var exports: any;
-const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
+const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60, useClones: false });
 
 declare module 'axios' {
     export interface AxiosRequestConfig {
@@ -28,26 +26,28 @@ export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosEr
 export { FlexsoAxiosCache } from './cache/axiosCache';
 
 export function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | { method: Method, url: string, params: object } = 'options') {
-    if (!instanceConfig?.adapter) {
-        const configHash = objectHash(instanceConfig || "default");
-        const cacheKey = `${configHash}_$$_${destination}`;
+    return SapCfAxios(destination, instanceConfig, xsrfConfig)
+    /*
+    // not relevant to cache an instance as everything is loaded in the interceptors.
 
-        if (!instanceCache.has(cacheKey)) {
-            instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
-        }
-        const instance = instanceCache.get<AxiosInstance>(cacheKey);
-        if (!instance) {
+    const configHash = objectHash(instanceConfig || "default");
+    const cacheKey = `${configHash}_$$_${destination}`;
 
-            const cfErr = {
-                message: 'unable to get the destination instance',
-            }
-            throw cfErr;
-            //throw 'unable to get the destination instance';
-        }
-        return instance;
-    } else {
-        return SapCfAxios(destination, instanceConfig, xsrfConfig)
+    if (!instanceCache.has(cacheKey)) {
+        instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
     }
+    const instance = instanceCache.get<AxiosInstance>(cacheKey);
+    if (!instance) {
+
+        const cfErr = {
+            message: 'unable to get the destination instance',
+        }
+        throw cfErr;
+        //throw 'unable to get the destination instance';
+    }
+    return instance;
+    */
+
 }
 
 export function flushCache() {

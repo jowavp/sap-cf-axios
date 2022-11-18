@@ -1,6 +1,6 @@
 {
   "name": "sap-cf-axios",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "description": "Wrap axios to use the SAP Cloud Foundry destination Service",
   "main": "dist/index.js",
   "files": [
@@ -27,7 +27,6 @@
     "cf-nodejs-logging-support": "^6.13.2",
     "flexso-cf-tenantcache": "^0.0.2",
     "node-cache": "^5.1.2",
-    "object-hash": "^3.0.0",
     "sap-cf-destconn": "^0.0.33"
   },
   "devDependencies": {
