@@ -28,7 +28,7 @@ export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosEr
 export { FlexsoAxiosCache } from './cache/axiosCache';
 
 export function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | { method: Method, url: string, params: object } = 'options') {
-    if (instanceConfig?.adapter) {
+    if (!instanceConfig?.adapter) {
         const configHash = objectHash(instanceConfig || "default");
         const cacheKey = `${configHash}_$$_${destination}`;
 
