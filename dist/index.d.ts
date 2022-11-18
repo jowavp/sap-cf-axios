@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 declare module 'axios' {
     interface AxiosRequestConfig {
         skipCache?: boolean;
@@ -18,11 +18,11 @@ export declare function getSapCfAxiosInstance(destination: string, instanceConfi
     method: Method;
     url: string;
     params: object;
-}): AxiosInstance;
+}): import("axios").AxiosInstance;
 export declare function flushCache(): void;
 export default function SapCfAxios(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig?: Method | {
     method: Method;
     url: string;
     params: object;
-}): AxiosInstance;
+}): import("axios").AxiosInstance;
 export declare function logAxiosError(error: any, logger1: any): void;

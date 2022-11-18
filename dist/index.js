@@ -41,7 +41,7 @@ const axios_1 = __importDefault(require("axios"));
 const node_cache_1 = __importDefault(require("node-cache"));
 const log = __importStar(require("cf-nodejs-logging-support"));
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
-const instanceCache = new node_cache_1.default({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
+const instanceCache = new node_cache_1.default({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60, useClones: false });
 var axios_2 = require("axios");
 Object.defineProperty(exports, "AxiosError", { enumerable: true, get: function () { return axios_2.AxiosError; } });
 var axiosCache_1 = require("./cache/axiosCache");
@@ -49,26 +49,24 @@ Object.defineProperty(exports, "FlexsoAxiosCache", { enumerable: true, get: func
 function getSapCfAxiosInstance(destination, instanceConfig, xsrfConfig = 'options') {
     return SapCfAxios(destination, instanceConfig, xsrfConfig);
     /*
-    if (!instanceConfig?.adapter) {
-        const configHash = objectHash(instanceConfig || "default");
-        const cacheKey = `${configHash}_$$_${destination}`;
+    // not relevant to cache an instance as everything is loaded in the interceptors.
 
-        if (!instanceCache.has(cacheKey)) {
-            instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
-        }
-        const instance = instanceCache.get<AxiosInstance>(cacheKey);
-        if (!instance) {
+    const configHash = objectHash(instanceConfig || "default");
+    const cacheKey = `${configHash}_$$_${destination}`;
 
-            const cfErr = {
-                message: 'unable to get the destination instance',
-            }
-            throw cfErr;
-            //throw 'unable to get the destination instance';
-        }
-        return instance;
-    } else {
-        return SapCfAxios(destination, instanceConfig, xsrfConfig)
+    if (!instanceCache.has(cacheKey)) {
+        instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
     }
+    const instance = instanceCache.get<AxiosInstance>(cacheKey);
+    if (!instance) {
+
+        const cfErr = {
+            message: 'unable to get the destination instance',
+        }
+        throw cfErr;
+        //throw 'unable to get the destination instance';
+    }
+    return instance;
     */
 }
 exports.getSapCfAxiosInstance = getSapCfAxiosInstance;
@@ -106,9 +104,7 @@ function createInstance(destinationName, instanceConfig, xsrfConfig = 'options')
                 var tokenReq = {
                     url: csrfUrl,
                     method: csrfMethod,
-                    headers: {
-                        [newConfig.xsrfHeaderName]: "Fetch"
-                    },
+                    headers: Object.assign(Object.assign({}, (auth) && { authorization: auth }), { [newConfig.xsrfHeaderName]: "Fetch" }),
                     params: csrfParams
                 };
                 try {

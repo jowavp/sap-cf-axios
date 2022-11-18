@@ -27,7 +27,7 @@
     "cf-nodejs-logging-support": "^6.13.2",
     "flexso-cf-tenantcache": "^0.0.2",
     "node-cache": "^5.1.2",
-    "sap-cf-destconn": "^0.0.33"
+    "sap-cf-destconn": "^0.0.34"
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
