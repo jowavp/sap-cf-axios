@@ -2,8 +2,8 @@ import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
 import TenantCache from "flexso-cf-tenantcache";
 import objectHash from "object-hash";
 
-function isRunningLocal() {
-    return process.env.NODE_ENV === 'local';
+function isRunningLocal(localdebug: boolean) {
+    return localdebug && process.env.NODE_ENV === 'local';
 }
 
 export class FlexsoAxiosCache {
@@ -13,6 +13,7 @@ export class FlexsoAxiosCache {
 
     async adapter(config: AxiosRequestConfig<any>) {
 
+        const localDebug = config.localDebug || false;
         // check if this config is available in the cahe.
         let saveToCache = (res: AxiosPromise<any>) => res;
         let start = new Date().getTime();
@@ -32,7 +33,7 @@ export class FlexsoAxiosCache {
                 if (resultPromise) {
                     const result = await resultPromise;
                     if (result.status > 199 && result.status < 300) {
-                        if (isRunningLocal()) {
+                        if (isRunningLocal(localDebug)) {
                             const end = new Date().getTime();
                             console.info(`Cached request: ${config.url}: ${end - start} ms`)
                         }
@@ -47,7 +48,7 @@ export class FlexsoAxiosCache {
                 const result = this.defaultAdapter(config);
                 return saveToCache(result).then(
                     result => {
-                        if (isRunningLocal()) {
+                        if (isRunningLocal(localDebug)) {
                             const end = new Date().getTime()
                             // const url =  axios.getUri(config);
                             console.info(`${config.method} request: ${config.url}: ${end - start} ms`)

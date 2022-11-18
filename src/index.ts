@@ -1,8 +1,9 @@
 import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import NodeCache from 'node-cache';
 import * as log from 'cf-nodejs-logging-support';
 import enhanceConfig from './configEnhancer';
+import objectHash from 'object-hash';
 
 declare var exports: any;
 const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60, useClones: false });
@@ -10,6 +11,7 @@ const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60
 declare module 'axios' {
     export interface AxiosRequestConfig {
         skipCache?: boolean;
+        localDebug?: boolean;
         subscribedDomain?: string;
         logger?: any;
     }
@@ -26,9 +28,6 @@ export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosEr
 export { FlexsoAxiosCache } from './cache/axiosCache';
 
 export function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | { method: Method, url: string, params: object } = 'options') {
-    return SapCfAxios(destination, instanceConfig, xsrfConfig)
-    /*
-    // not relevant to cache an instance as everything is loaded in the interceptors.
 
     const configHash = objectHash(instanceConfig || "default");
     const cacheKey = `${configHash}_$$_${destination}`;
@@ -46,7 +45,7 @@ export function getSapCfAxiosInstance(destination: string, instanceConfig?: SapC
         //throw 'unable to get the destination instance';
     }
     return instance;
-    */
+
 
 }
 
@@ -89,7 +88,7 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
                         url: csrfUrl,
                         method: csrfMethod,
                         headers: {
-                            ...(auth) && {authorization: auth},
+                            ...(auth) && { authorization: auth },
                             [newConfig.xsrfHeaderName]: "Fetch"
                         },
                         params: csrfParams

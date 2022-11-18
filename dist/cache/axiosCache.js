@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FlexsoAxiosCache = void 0;
 const axios_1 = __importDefault(require("axios"));
 const object_hash_1 = __importDefault(require("object-hash"));
-function isRunningLocal() {
-    return process.env.NODE_ENV === 'local';
+function isRunningLocal(localdebug) {
+    return localdebug && process.env.NODE_ENV === 'local';
 }
 class FlexsoAxiosCache {
     constructor(cacheFn, defaultAdapter = axios_1.default.defaults.adapter) {
@@ -26,6 +26,7 @@ class FlexsoAxiosCache {
     adapter(config) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            const localDebug = config.localDebug || false;
             // check if this config is available in the cahe.
             let saveToCache = (res) => res;
             let start = new Date().getTime();
@@ -42,7 +43,7 @@ class FlexsoAxiosCache {
                     if (resultPromise) {
                         const result = yield resultPromise;
                         if (result.status > 199 && result.status < 300) {
-                            if (isRunningLocal()) {
+                            if (isRunningLocal(localDebug)) {
                                 const end = new Date().getTime();
                                 console.info(`Cached request: ${config.url}: ${end - start} ms`);
                             }
@@ -56,7 +57,7 @@ class FlexsoAxiosCache {
                 if (this.defaultAdapter) {
                     const result = this.defaultAdapter(config);
                     return saveToCache(result).then(result => {
-                        if (isRunningLocal()) {
+                        if (isRunningLocal(localDebug)) {
                             const end = new Date().getTime();
                             // const url =  axios.getUri(config);
                             console.info(`${config.method} request: ${config.url}: ${end - start} ms`);
