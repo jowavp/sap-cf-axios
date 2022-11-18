@@ -28,22 +28,26 @@ export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosEr
 export { FlexsoAxiosCache } from './cache/axiosCache';
 
 export function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | { method: Method, url: string, params: object } = 'options') {
-    const configHash = objectHash(instanceConfig || "default");
-    const cacheKey = `${configHash}_$$_${destination}`;
+    if (instanceConfig?.adapter) {
+        const configHash = objectHash(instanceConfig || "default");
+        const cacheKey = `${configHash}_$$_${destination}`;
 
-    if (!instanceCache.has(cacheKey)) {
-        instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
-    }
-    const instance = instanceCache.get<AxiosInstance>(cacheKey);
-    if (!instance) {
-
-        const cfErr = {
-            message: 'unable to get the destination instance',
+        if (!instanceCache.has(cacheKey)) {
+            instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
         }
-        throw cfErr;
-        //throw 'unable to get the destination instance';
+        const instance = instanceCache.get<AxiosInstance>(cacheKey);
+        if (!instance) {
+
+            const cfErr = {
+                message: 'unable to get the destination instance',
+            }
+            throw cfErr;
+            //throw 'unable to get the destination instance';
+        }
+        return instance;
+    } else {
+        return SapCfAxios(destination, instanceConfig, xsrfConfig)
     }
-    return instance;
 }
 
 export function flushCache() {
