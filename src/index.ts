@@ -4,20 +4,28 @@ import NodeCache from 'node-cache';
 import * as log from 'cf-nodejs-logging-support';
 
 import enhanceConfig from './configEnhancer';
-import { isFunction } from 'util';
+import objectHash from 'object-hash';
 
 declare var exports: any;
 const instanceCache = new NodeCache({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
 
-export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
-    subscribedDomain?: string;
-    logger?: any;
+declare module 'axios' {
+    export interface AxiosRequestConfig {
+        skipCache?: boolean;
+        subscribedDomain?: string;
+        logger?: any;
+    }
 }
 
+export interface SapCFAxiosRequestConfig extends AxiosRequestConfig { }
+
 export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+export { FlexsoAxiosCache } from './cache/axiosCache';
 
 export function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | { method: Method, url: string, params: object } = 'options') {
-    const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
+    const configHash = objectHash(instanceConfig || "default");
+    const cacheKey = `${configHash}_$$_${destination}`;
+
     if (!instanceCache.has(cacheKey)) {
         instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
     }

@@ -35,17 +35,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logAxiosError = exports.flushCache = exports.getSapCfAxiosInstance = exports.AxiosError = void 0;
+exports.logAxiosError = exports.flushCache = exports.getSapCfAxiosInstance = exports.FlexsoAxiosCache = exports.AxiosError = void 0;
 const sap_cf_destconn_1 = require("sap-cf-destconn");
 const axios_1 = __importDefault(require("axios"));
 const node_cache_1 = __importDefault(require("node-cache"));
 const log = __importStar(require("cf-nodejs-logging-support"));
 const configEnhancer_1 = __importDefault(require("./configEnhancer"));
+const object_hash_1 = __importDefault(require("object-hash"));
 const instanceCache = new node_cache_1.default({ stdTTL: 12 * 60 * 60, checkperiod: 60 * 60 });
 var axios_2 = require("axios");
 Object.defineProperty(exports, "AxiosError", { enumerable: true, get: function () { return axios_2.AxiosError; } });
+var axiosCache_1 = require("./cache/axiosCache");
+Object.defineProperty(exports, "FlexsoAxiosCache", { enumerable: true, get: function () { return axiosCache_1.FlexsoAxiosCache; } });
 function getSapCfAxiosInstance(destination, instanceConfig, xsrfConfig = 'options') {
-    const cacheKey = `${instanceConfig && instanceConfig.subscribedDomain}_$$_${destination}`;
+    const configHash = (0, object_hash_1.default)(instanceConfig || "default");
+    const cacheKey = `${configHash}_$$_${destination}`;
     if (!instanceCache.has(cacheKey)) {
         instanceCache.set(cacheKey, SapCfAxios(destination, instanceConfig, xsrfConfig));
     }
