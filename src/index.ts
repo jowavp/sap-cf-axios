@@ -1,5 +1,5 @@
 import { readDestination, IHTTPDestinationConfiguration } from 'sap-cf-destconn'
-import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import NodeCache from 'node-cache';
 import * as log from 'cf-nodejs-logging-support';
 
@@ -17,7 +17,12 @@ declare module 'axios' {
     }
 }
 
-export interface SapCFAxiosRequestConfig extends AxiosRequestConfig { }
+export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
+    interceptors?: {
+        request?: ((config: AxiosRequestConfig<any>) => AxiosRequestConfig<any>)[],
+        response?: ((config: AxiosResponse<any>) => AxiosResponse<any>)[]
+    }
+}
 
 export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 export { FlexsoAxiosCache } from './cache/axiosCache';
@@ -52,9 +57,12 @@ export default function SapCfAxios(destination: string, instanceConfig?: SapCFAx
 
 function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig: Method | { method: Method, url: string, params: object } = 'options') {
 
-    // we will add an interceptor to axios that will take care of the destination configuration
-    const instance = axios.create(instanceConfig);
+    // keep the interceptors to register on the instance
+    const interceptors = instanceConfig?.interceptors;
+    if (instanceConfig) delete instanceConfig.interceptors;
 
+    const instance = axios.create(instanceConfig);
+    // we will add an interceptor to axios that will take care of the destination configuration
     // we return the destination configuration in the response.
     instance.interceptors.request.use(
         async (config) => {
@@ -125,6 +133,20 @@ function createInstance(destinationName: string, instanceConfig?: SapCFAxiosRequ
             }
         }
     );
+
+    // if there are interceptors, add them only once to the instance!!!
+    if (interceptors) {
+        if (interceptors.request) {
+            (interceptors.request || []).forEach(
+                (interceptorFn) => instance.interceptors.request.use(interceptorFn)
+            )
+        }
+        if (interceptors.response) {
+            (interceptors.response || []).forEach(
+                (interceptorFn) => instance.interceptors.response.use(interceptorFn)
+            )
+        }
+    }
 
     return instance;
 

@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 declare module 'axios' {
     interface AxiosRequestConfig {
         skipCache?: boolean;
@@ -7,6 +7,10 @@ declare module 'axios' {
     }
 }
 export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
+    interceptors?: {
+        request?: ((config: AxiosRequestConfig<any>) => AxiosRequestConfig<any>)[];
+        response?: ((config: AxiosResponse<any>) => AxiosResponse<any>)[];
+    };
 }
 export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 export { FlexsoAxiosCache } from './cache/axiosCache';

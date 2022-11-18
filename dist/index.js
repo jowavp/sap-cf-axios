@@ -74,8 +74,12 @@ function SapCfAxios(destination, instanceConfig, xsrfConfig = 'options') {
 exports.default = SapCfAxios;
 // exports = SapCfAxios;
 function createInstance(destinationName, instanceConfig, xsrfConfig = 'options') {
-    // we will add an interceptor to axios that will take care of the destination configuration
+    // keep the interceptors to register on the instance
+    const interceptors = instanceConfig === null || instanceConfig === void 0 ? void 0 : instanceConfig.interceptors;
+    if (instanceConfig)
+        delete instanceConfig.interceptors;
     const instance = axios_1.default.create(instanceConfig);
+    // we will add an interceptor to axios that will take care of the destination configuration
     // we return the destination configuration in the response.
     instance.interceptors.request.use((config) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
@@ -137,6 +141,15 @@ function createInstance(destinationName, instanceConfig, xsrfConfig = 'options')
             throw e;
         }
     }));
+    // if there are interceptors, add them only once to the instance!!!
+    if (interceptors) {
+        if (interceptors.request) {
+            (interceptors.request || []).forEach((interceptorFn) => instance.interceptors.request.use(interceptorFn));
+        }
+        if (interceptors.response) {
+            (interceptors.response || []).forEach((interceptorFn) => instance.interceptors.response.use(interceptorFn));
+        }
+    }
     return instance;
 }
 function logAxiosError(error, logger1) {
