@@ -45,8 +45,8 @@ function enhanceConfig(config, destination) {
             // connect over the cloud connector
             const authHeader = (((_a = config.headers) === null || _a === void 0 ? void 0 : _a['Authorization']) || ((_b = config.headers) === null || _b === void 0 ? void 0 : _b['authorization']));
             const connectivityValues = destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId, authHeader) :
-                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId);
+                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId, authHeader, true) :
+                yield (0, sap_cf_destconn_1.readConnectivity)(destinationConfiguration.CloudConnectorLocationId, undefined, false);
             config = Object.assign(Object.assign({}, config), { proxy: connectivityValues.proxy, headers: Object.assign(Object.assign({}, config.headers), connectivityValues.headers) });
             // if it is principal propagation ... remove the original authentication header ...
             // for principal propagation, Proxy-Authorization header will be used to generate the logon ticket 

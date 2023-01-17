@@ -48,8 +48,8 @@ export default async function enhanceConfig(config: AxiosRequestConfig, destinat
         const authHeader = <string | undefined>(config.headers?.['Authorization'] || config.headers?.['authorization']);
         const connectivityValues =
             destinationConfiguration.Authentication === "PrincipalPropagation" ?
-                await readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader) :
-                await readConnectivity(destinationConfiguration.CloudConnectorLocationId);
+                await readConnectivity(destinationConfiguration.CloudConnectorLocationId, authHeader, true) :
+                await readConnectivity(destinationConfiguration.CloudConnectorLocationId, undefined, false);
 
         config = {
             ...config,
