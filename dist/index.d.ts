@@ -1,5 +1,5 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
-declare module 'axios' {
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from "axios";
+declare module "axios" {
     interface AxiosRequestConfig {
         skipCache?: boolean;
         localDebug?: boolean;
@@ -13,8 +13,8 @@ export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
         response?: ((config: AxiosResponse<any>) => AxiosResponse<any>)[];
     };
 }
-export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-export { FlexsoAxiosCache } from './cache/axiosCache';
+export { AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse, AxiosError, } from "axios";
+export { FlexsoAxiosCache } from "./cache/axiosCache";
 export declare function getSapCfAxiosInstance(destination: string, instanceConfig?: SapCFAxiosRequestConfig, xsrfConfig?: Method | {
     method: Method;
     url: string;

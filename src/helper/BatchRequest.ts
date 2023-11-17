@@ -136,7 +136,7 @@ ${r.body || ""}`
     return resp.data
       ?.split(`--${boundary}`)
       .filter((t) => t && !t.startsWith("--"))
-      .map((t) => t.split(t.includes("/r/n") ? "\r\n" : "\n").filter((t) => t))
+      .map((t) => t.split(t.includes("\r\n") ? "\r\n" : "\n").filter((t) => t))
       .map((a) => a.slice(-1)[0])
       .map((j) => JSON.parse(j) as T);
   }

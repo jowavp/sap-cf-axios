@@ -114,7 +114,7 @@ ${r.body || ""}`)
         if (!boundary) {
             throw `This is not a response of a batch request`;
         }
-        return (_a = resp.data) === null || _a === void 0 ? void 0 : _a.split(`--${boundary}`).filter((t) => t && !t.startsWith("--")).map((t) => t.split(t.includes("/r/n") ? "\r\n" : "\n").filter((t) => t)).map((a) => a.slice(-1)[0]).map((j) => JSON.parse(j));
+        return (_a = resp.data) === null || _a === void 0 ? void 0 : _a.split(`--${boundary}`).filter((t) => t && !t.startsWith("--")).map((t) => t.split(t.includes("\r\n") ? "\r\n" : "\n").filter((t) => t)).map((a) => a.slice(-1)[0]).map((j) => JSON.parse(j));
     }
 }
 exports.default = BatchRequest;
