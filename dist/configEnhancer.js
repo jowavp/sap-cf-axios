@@ -54,7 +54,6 @@ function enhanceConfig(config, destination) {
                 // some applications fail on bearer
                 destination.authTokens[0].type = "Bearer";
             config.headers = new axios_1.AxiosHeaders(Object.assign(Object.assign({}, config.headers), { Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}` }));
-            delete config.headers.authorization;
         }
         else if (destinationConfiguration.Authentication === "OAuth2ClientCredentials") {
             if (destination.authTokens &&
@@ -69,7 +68,6 @@ function enhanceConfig(config, destination) {
             }
             const clientCredentialsToken = yield createToken(destinationConfiguration);
             config.headers = new axios_1.AxiosHeaders(Object.assign(Object.assign({}, config.headers), { Authorization: `Bearer ${clientCredentialsToken}` }));
-            delete config.headers.authorization;
         }
         if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
             // connect over the cloud connector

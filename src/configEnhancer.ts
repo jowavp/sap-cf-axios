@@ -45,7 +45,6 @@ export default async function enhanceConfig(
       ...config.headers,
       Authorization: `${destination.authTokens[0].type} ${destination.authTokens[0].value}`,
     });
-    delete config.headers.authorization;
   } else if (
     destinationConfiguration.Authentication === "OAuth2ClientCredentials"
   ) {
@@ -67,7 +66,6 @@ export default async function enhanceConfig(
       ...config.headers,
       Authorization: `Bearer ${clientCredentialsToken}`,
     });
-    delete config.headers.authorization;
   }
 
   if (destinationConfiguration.ProxyType.toLowerCase() === "onpremise") {
