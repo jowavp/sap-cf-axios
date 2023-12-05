@@ -1,6 +1,6 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from "axios";
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, Method } from "axios";
 declare module "axios" {
-    interface AxiosRequestConfig {
+    interface AxiosRequestConfig<D = any> {
         skipCache?: boolean;
         localDebug?: boolean;
         subscribedDomain?: string;
@@ -9,7 +9,7 @@ declare module "axios" {
 }
 export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
     interceptors?: {
-        request?: ((config: AxiosRequestConfig<any>) => AxiosRequestConfig<any>)[];
+        request?: ((config: InternalAxiosRequestConfig<any>) => InternalAxiosRequestConfig<any>)[];
         response?: ((config: AxiosResponse<any>) => AxiosResponse<any>)[];
     };
 }

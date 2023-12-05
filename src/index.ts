@@ -3,9 +3,11 @@ import {
   IHTTPDestinationConfiguration,
 } from "sap-cf-destconn";
 import axios, {
+  AxiosHeaders,
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
+  InternalAxiosRequestConfig,
   Method,
 } from "axios";
 import NodeCache from "node-cache";
@@ -22,7 +24,7 @@ const instanceCache = new NodeCache({
 });
 
 declare module "axios" {
-  export interface AxiosRequestConfig {
+  export interface AxiosRequestConfig<D = any> {
     skipCache?: boolean;
     localDebug?: boolean;
     subscribedDomain?: string;
@@ -32,7 +34,9 @@ declare module "axios" {
 
 export interface SapCFAxiosRequestConfig extends AxiosRequestConfig {
   interceptors?: {
-    request?: ((config: AxiosRequestConfig<any>) => AxiosRequestConfig<any>)[];
+    request?: ((
+      config: InternalAxiosRequestConfig<any>
+    ) => InternalAxiosRequestConfig<any>)[];
     response?: ((config: AxiosResponse<any>) => AxiosResponse<any>)[];
   };
 }
@@ -104,8 +108,7 @@ function createInstance(
   // we return the destination configuration in the response.
   instance.interceptors.request.use(async (config) => {
     // enhance config object with destination information
-    //@ts-ignore
-    const logger: ILogger = config.logger || log || console;
+    const logger = config.logger || log || console;
 
     const auth = <string | undefined>(
       (config.headers?.Authorization || config.headers?.authorization)
@@ -133,13 +136,13 @@ function createInstance(
         const csrfParams =
           typeof xsrfConfig === "string" ? {} : xsrfConfig.params;
 
-        var tokenReq: AxiosRequestConfig = {
+        var tokenReq: InternalAxiosRequestConfig = {
           url: csrfUrl,
           method: csrfMethod,
-          headers: {
+          headers: new AxiosHeaders({
             ...(auth && { authorization: auth }),
             [newConfig.xsrfHeaderName]: "Fetch",
-          },
+          }),
           params: csrfParams,
         };
         try {
@@ -148,7 +151,7 @@ function createInstance(
 
           // req.headers = {...req.headers, [req.xsrfHeaderName]: headers[req.xsrfHeaderName]}
           if (headers) {
-            if (!newConfig.headers) newConfig.headers = {};
+            if (!newConfig.headers) newConfig.headers = new AxiosHeaders({});
             if (cookies) newConfig.headers.cookie = cookies.join("; ");
             if (headers[newConfig.xsrfHeaderName]) {
               newConfig.headers[newConfig.xsrfHeaderName] =

@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13,13 +36,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FlexsoAxiosCache = void 0;
-const axios_1 = __importDefault(require("axios"));
+const axios_1 = __importStar(require("axios"));
 const object_hash_1 = __importDefault(require("object-hash"));
 function isRunningLocal(localdebug) {
-    return localdebug && process.env.NODE_ENV === 'local';
+    return localdebug && process.env.NODE_ENV === "local";
 }
 class FlexsoAxiosCache {
-    constructor(cacheFn, defaultAdapter = axios_1.default.defaults.adapter) {
+    constructor(cacheFn, defaultAdapter = (0, axios_1.getAdapter)(axios_1.default.defaults.adapter)) {
         this.cacheFn = cacheFn;
         this.defaultAdapter = defaultAdapter;
     }
@@ -33,7 +56,9 @@ class FlexsoAxiosCache {
             if (!config.skipCache && ((_a = config.method) === null || _a === void 0 ? void 0 : _a.toLocaleLowerCase()) === "get") {
                 const cache = this.cacheFn(config);
                 // metadata is the same for all users.
-                const cacheKey = ((_b = config.url) === null || _b === void 0 ? void 0 : _b.includes("$metadata")) ? (0, object_hash_1.default)(axios_1.default.getUri(config)) : (0, object_hash_1.default)(config);
+                const cacheKey = ((_b = config.url) === null || _b === void 0 ? void 0 : _b.includes("$metadata"))
+                    ? (0, object_hash_1.default)(axios_1.default.getUri(config))
+                    : (0, object_hash_1.default)(config);
                 saveToCache = (res) => {
                     cache.set(config.subscribedDomain || "default", cacheKey, res);
                     return res;
@@ -56,7 +81,7 @@ class FlexsoAxiosCache {
             try {
                 if (this.defaultAdapter) {
                     const result = this.defaultAdapter(config);
-                    return saveToCache(result).then(result => {
+                    return saveToCache(result).then((result) => {
                         if (isRunningLocal(localDebug)) {
                             const end = new Date().getTime();
                             // const url =  axios.getUri(config);
@@ -69,7 +94,7 @@ class FlexsoAxiosCache {
                     });
                 }
                 else {
-                    throw ('No default adapter');
+                    throw "No default adapter";
                 }
             }
             catch (err) {
