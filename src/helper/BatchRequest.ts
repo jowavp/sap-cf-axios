@@ -72,7 +72,7 @@ ${r.body || ""}`
     url: string,
     axiosInstance: AxiosInstance, // <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>,
     doWait = true,
-    continueOnError = true
+    continueOnError = false
   ) {
     let wait = Promise.resolve(true);
     let responses: Map<IBatchRequestBodyRequest, T> = new Map();
@@ -105,7 +105,7 @@ ${r.body || ""}`
     return responses;
   }
 
-  async doBatchRequestsParallel<T>(url: string, axiosInstance: AxiosInstance, continueOnError = true) {
+  async doBatchRequestsParallel<T>(url: string, axiosInstance: AxiosInstance, continueOnError = false) {
 
     let additionalHeaders = {};
     if(continueOnError) additionalHeaders["Prefer"] = "odata.continue-on-error";
