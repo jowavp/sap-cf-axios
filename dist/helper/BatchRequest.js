@@ -52,19 +52,20 @@ ${r.body || ""}`)
         });
     }
     doBatchRequests(url, axiosInstance, // <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>,
-    doWait = true) {
+    doWait = true, continueOnError = true) {
         return __awaiter(this, void 0, void 0, function* () {
             let wait = Promise.resolve(true);
             let responses = new Map();
             for (let i = 0; i < this.batchRequests.length && (yield wait); i++) {
                 try {
+                    let additionalHeaders = {};
+                    if (continueOnError)
+                        additionalHeaders["Prefer"] = "odata.continue-on-error";
                     const result = yield axiosInstance({
                         method: "POST",
                         url,
                         data: this.batchRequests[i].payload,
-                        headers: {
-                            "Content-Type": this.batchRequests[i].contentType,
-                        },
+                        headers: Object.assign({ "Content-Type": this.batchRequests[i].contentType }, additionalHeaders)
                     });
                     // next call for LMS can be done in 500 mseconds ... start counting
                     if (doWait)
@@ -80,16 +81,17 @@ ${r.body || ""}`)
             return responses;
         });
     }
-    doBatchRequestsParallel(url, axiosInstance) {
+    doBatchRequestsParallel(url, axiosInstance, continueOnError = true) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            let additionalHeaders = {};
+            if (continueOnError)
+                additionalHeaders["Prefer"] = "odata.continue-on-error";
             const requests = this.batchRequests.map((b) => axiosInstance({
                 method: "POST",
                 url,
                 data: b.payload,
-                headers: {
-                    "Content-Type": b.contentType,
-                },
+                headers: Object.assign({ "Content-Type": b.contentType }, additionalHeaders),
             }));
             try {
                 return (yield Promise.all(requests)).reduce((acc, resp, i) => {
