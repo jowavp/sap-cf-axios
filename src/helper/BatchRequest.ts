@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 import { v4 as uuidv4 } from "uuid";
 export { AxiosInstance, AxiosResponse } from "axios";
 
@@ -72,24 +72,21 @@ ${r.body || ""}`
     url: string,
     axiosInstance: AxiosInstance, // <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>,
     doWait = true,
-    continueOnError = false
+    additionalHeaders?: { [key: string]: string }
   ) {
     let wait = Promise.resolve(true);
     let responses: Map<IBatchRequestBodyRequest, T> = new Map();
 
     for (let i = 0; i < this.batchRequests.length && (await wait); i++) {
       try {
-        let additionalHeaders = {};
-        if(continueOnError) additionalHeaders["Prefer"] = "odata.continue-on-error";
-
         const result = <AxiosResponse<string>>await axiosInstance({
           method: "POST",
           url,
           data: this.batchRequests[i].payload,
           headers: {
             "Content-Type": this.batchRequests[i].contentType,
-            ...additionalHeaders
-          }
+            ...additionalHeaders,
+          },
         });
 
         // next call for LMS can be done in 500 mseconds ... start counting
@@ -105,11 +102,11 @@ ${r.body || ""}`
     return responses;
   }
 
-  async doBatchRequestsParallel<T>(url: string, axiosInstance: AxiosInstance, continueOnError = false) {
-
-    let additionalHeaders = {};
-    if(continueOnError) additionalHeaders["Prefer"] = "odata.continue-on-error";
-
+  async doBatchRequestsParallel<T>(
+    url: string,
+    axiosInstance: AxiosInstance,
+    additionalHeaders?: { [key: string]: string }
+  ) {
     const requests = this.batchRequests.map((b) =>
       axiosInstance({
         method: "POST",
@@ -117,7 +114,7 @@ ${r.body || ""}`
         data: b.payload,
         headers: {
           "Content-Type": b.contentType,
-          ...additionalHeaders
+          ...additionalHeaders,
         },
       })
     );
