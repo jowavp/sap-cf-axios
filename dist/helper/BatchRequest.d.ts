@@ -18,7 +18,7 @@ export default class BatchRequest {
     constructor(reqs: IBatchRequestBodyRequest[], logger: any, size?: number);
     private generateBatchRequests;
     doBatchRequests<T>(url: string, axiosInstance: AxiosInstance, // <T>(req: AxiosRequestConfig) => Promise<AxiosResponse<T>>,
-    doWait?: boolean): Promise<Map<IBatchRequestBodyRequest, T>>;
-    doBatchRequestsParallel<T>(url: string, axiosInstance: AxiosInstance): Promise<Map<IBatchRequestBodyRequest, T>>;
+    doWait?: boolean, continueOnError?: boolean): Promise<Map<IBatchRequestBodyRequest, T>>;
+    doBatchRequestsParallel<T>(url: string, axiosInstance: AxiosInstance, continueOnError?: boolean): Promise<Map<IBatchRequestBodyRequest, T>>;
     private getBatchResponses;
 }
