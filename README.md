@@ -42,7 +42,7 @@ axios({
 });
 ```
 
-### OAuth2SAMLDearerAssertion, OAuth2UserTokenExchange and Principal Propagation
+### OAuth2SAMLBearerAssertion, OAuth2UserTokenExchange and Principal Propagation
 
 For connecting to a destination as the current user, we send the current JWT token in the authorization header of the request.
 ```js
